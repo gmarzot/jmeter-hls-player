@@ -1,4 +1,4 @@
-package com.blazemeter.jmeter.hls.logic;
+package com.ramp.jmeter.hls-player.logic;
 
 import org.apache.jmeter.samplers.SampleResult;
 import org.junit.Before;
