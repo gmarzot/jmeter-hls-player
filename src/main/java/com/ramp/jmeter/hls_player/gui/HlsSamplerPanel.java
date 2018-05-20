@@ -1,4 +1,4 @@
-package com.ramp.jmeter.hls-player.gui;
+package com.ramp.jmeter.hls_player.gui;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;

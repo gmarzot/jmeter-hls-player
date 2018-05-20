@@ -1,6 +1,6 @@
-package com.ramp.jmeter.hls-player.gui;
+package com.ramp.jmeter.hls_player.gui;
 
-import com.blazemeter.jmeter.hls.logic.HlsSampler;
+import com.ramp.jmeter.hls_player.logic.HlsSampler;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.logging.LoggingManager;
