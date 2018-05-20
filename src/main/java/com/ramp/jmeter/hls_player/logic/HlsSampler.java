@@ -29,8 +29,6 @@ public class HlsSampler extends AbstractSampler {
     public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
     private static final Logger log = LoggingManager.getLoggerForClass();
 
-    private boolean externalLoop = true;
-    
     private Parser parser;
 
     private int durationSeconds = 0; // configured video duration
@@ -156,106 +154,88 @@ public class HlsSampler extends AbstractSampler {
 
     @Override
     public SampleResult sample(Entry e) {
-    	if (masterResult == null || masterResponse == null) {
-    		masterResult = new SampleResult();
-    	}
     	try {
-    		if (masterResponse == null) {
-    			masterResponse = getMasterList(masterResult, parser);
-    			playlistPath = getPlaylistPath(masterResponse, parser);
-    			startTimeMillis = System.currentTimeMillis();
-    			if (externalLoop) return masterResult;
-    		}
+	    if (masterResult == null) {
+		masterResult = new SampleResult();
+		masterResponse = getMasterList(masterResult, parser);
+		playlistPath = getPlaylistPath(masterResponse, parser);
+		startTimeMillis = System.currentTimeMillis();
+		return masterResult;
+	    }
 
-    		log.info("sample: playlistPath: " + playlistPath + " playlist: " + playlist + " thread: " + Thread.currentThread().getName());
+	    log.info("sample: playlistPath: " + playlistPath + " playlist: " + playlist +
+		     " thread: " + Thread.currentThread().getName());
 
-    		if (getVideoDuration())
-    			durationSeconds = Integer.parseInt(getPlAYSecondsData());
+	    if (getVideoDuration())
+		durationSeconds = Integer.parseInt(getPlAYSecondsData());
 
-    		while (true) {
-    			boolean fetchedNewSegments = false;
-    			if (segments.isEmpty()) {
-    				long now = System.currentTimeMillis();
-    				if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
-    					try {
-    						Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
-    					} catch(InterruptedException e1) {
-    						log.warn("sample: Thead.sleep() interupted");
-    					}		    					
-    				}
-    				playlistResult = new SampleResult();
-    				playlistResponse = getPlaylist(playlistResult, parser);
-    				segments.addAll(parser.extractSegmentUris(playlistResponse.getResponse()));
-    				lastTimeMillis = now;
+	    while (true) {
+		if (segments.isEmpty()) {
+		    long now = System.currentTimeMillis();
+		    if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
+			try {
+			    Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
+			} catch(InterruptedException e1) {
+			    log.warn("sample: Thead.sleep() interupted");
+			}		    					
+		    }
+		    playlistResult = new SampleResult();
+		    playlistResponse = getPlaylist(playlistResult, parser);
+		    segments.addAll(parser.extractSegmentUris(playlistResponse.getResponse()));
+		    lastTimeMillis = now;
     				
-    				int td = parser.getTargetDuration(playlistResponse.getResponse());
-    				if (td < 0) {
-    					log.error("sample: playlist contains no target duration: \\n" + playlistResponse.getResponse());
-    				} else if (targetDuration != 0 && td != targetDuration) {
-    					log.error("sample: playlist target duration changed: " + td + " (" + targetDuration + ")");
-    				}
-    				if (td > 0) {
-    					targetDuration = td;
-    				}
+		    int td = parser.getTargetDuration(playlistResponse.getResponse());
+		    if (td < 0) {
+			log.error("sample: playlist contains no target duration: \\n" + playlistResponse.getResponse());
+		    } else if (targetDuration != 0 && td != targetDuration) {
+			log.info("sample: playlist target duration changed: " + td + " (" + targetDuration + ")");
+		    }
+		    if (td > 0) {
+			targetDuration = td;
+		    }
     				
-    				isLive = parser.isLive(playlistResponse.getResponse());
-    				if (isLive) {
-    					log.info("sample: detected live playlist");
-    				}
-    				if (externalLoop) return playlistResult;
-    			}
+		    isLive = parser.isLive(playlistResponse.getResponse());
+		    if (isLive) {
+			log.info("sample: detected live playlist");
+		    }
+		    return playlistResult;
+		} else {
+		    DataSegment segment = segments.remove(0);
+		    if ((segmentsFetched.size() == 0) || (!segmentsFetched.contains(segment.getUri().trim()))) {
+			String durationStr = segment.getDuration();
+			float duration = Float.parseFloat(durationStr);
+			log.info("segment duration: " + durationStr + " (" + duration + ")");
 
-    			while (!segments.isEmpty()) {
-    				DataSegment segment = segments.remove(0);
-    				if ((segmentsFetched.size() == 0) || (!segmentsFetched.contains(segment.getUri().trim()))) {
-    					String durationStr = segment.getDuration();
-    					float duration = Float.parseFloat(durationStr);
-    					log.info("segment duration: " + durationStr + " (" + duration + ")");
-    					
-    					if (lastDurationSeconds > 0) playedSeconds += lastDurationSeconds;
-    					long now = System.currentTimeMillis();
-    					if (now < (startTimeMillis + Math.round(playedSeconds * 1000))) {
-    						try {
-    							long sleepMillis = (startTimeMillis + Math.round(playedSeconds*1000) - now);
-    							log.info("sample: sleeping: " + sleepMillis);
-    							Thread.sleep(sleepMillis); // only get segment when finished playing the one before
-    						} catch(InterruptedException e1) {
-    							log.warn("sample: Thead.sleep() interupted");
-    						}		    					
-    					}
-    					lastDurationSeconds = duration;
-    					SampleResult segmentResult = getSegment(parser, segment, playlistPath);
-    					segmentsFetched.add(segment.getUri().trim());
-    					if (externalLoop) return segmentResult;
-    					
-    					fetchedNewSegments = true;
-    					playlistResult.storeSubResult(segmentResult);
-    					if(getVideoDuration()) {
-    						if (playedSeconds > durationSeconds) break;
-    					}
-    				}
-    			}
-    			if (fetchedNewSegments) {
-    				masterResult.storeSubResult(playlistResult);
-    			}
-    			if(getVideoDuration()) {
-    				if (playedSeconds > durationSeconds) {
-    					initHlsSamplerData();
-    					break;
-    				}
-    			}
-    			if (!isLive) {
-    				initHlsSamplerData();
-    				break;
-    			}
-    		}
+			// playedSeconds is the total current playtime including the duration of the last segment
+			// we wait when this time is in the future
+			if (lastDurationSeconds > 0) playedSeconds += lastDurationSeconds;
+			long now = System.currentTimeMillis();
+			if ((now - startTimeMillis) < Math.round(playedSeconds * 1000)) {
+			    try {
+				long sleepMillis = (startTimeMillis + Math.round(playedSeconds*1000) - now);
+				log.info("sample: sleeping: " + sleepMillis);
+				Thread.sleep(sleepMillis); // only get segment when finished playing the one before
+			    } catch(InterruptedException e1) {
+				log.warn("sample: Thead.sleep() interupted");
+			    }		    					
+			}
+			lastDurationSeconds = duration;
+			SampleResult segmentResult = getSegment(parser, segment, playlistPath);
+			segmentsFetched.add(segment.getUri().trim());
+			return segmentResult;
+		    }
+		}
+
+		if (getVideoDuration()) {
+		    if (playedSeconds > durationSeconds) {
+			break;
+		    }
+		}
+	    }
     	} catch (IOException e1) {
-    		e1.printStackTrace();
-    		masterResult.sampleEnd();
-    		masterResult.setSuccessful(false);
-    		masterResult.setResponseMessage("Exception: " + e1);
+	    e1.printStackTrace();
     	}
-    	return masterResult;
+    	return null;
     }
 
 
@@ -275,7 +255,7 @@ public class HlsSampler extends AbstractSampler {
     	lastTimeMillis = 0;
     }
 
-	public String getURLData() {
+    public String getURLData() {
 	return this.getPropertyAsString("HLS.URL_DATA");
     }
 

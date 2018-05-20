@@ -143,6 +143,8 @@ public class HlsSamplerTest {
 				.thenReturn(false);
 
 
+		assertFalse(sampler == null);
+
 		SampleResult result = sampler.sample(null);
 
 		assertFalse(result == null);
@@ -157,5 +159,4 @@ public class HlsSamplerTest {
 		assertEquals("UTF-8", result.getDataEncodingNoDefault());
 
 	}
-
 }
