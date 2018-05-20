@@ -1,26 +1,32 @@
 package com.ramp.jmeter.hls_player.gui;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.GroupLayout;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.JRadioButton;
+import javax.swing.JLabel;
+import javax.swing.GroupLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.BorderFactory;
 import javax.swing.LayoutStyle;
+
 import java.awt.event.ItemEvent;
 
 public class HlsSamplerPanel extends JPanel {
 
-    private JPanel videoPanel = new JPanel();
+    private JPanel MasterPlaylistPanel = new JPanel();
+    private JPanel MediaPlaylistTypePanel = new JPanel();
+
 
     private JPanel videoStreamSelectionPanel = new JPanel();
     private JPanel resolutionOptions = new JPanel();
     private JPanel bandwidthOptions = new JPanel();
 
-    private JPanel audioStreamSelectionPanel = new JPanel();
-    private JPanel audioOptions = new JPanel();
-    private JPanel closedCaptionOptions = new JPanel();
+    private JPanel mediaPlaylistPanel = videoStreamSelectionPanel;
+
+    private JPanel audioTrackSelectionPanel = new JPanel();
+
+    private JPanel closedCaptionTrackSelectionPanel = new JPanel();
 
     private JLabel urlFieldLabel = new JLabel("URL  ");
 
@@ -31,6 +37,7 @@ public class HlsSamplerPanel extends JPanel {
     private JTextField audioField = new JTextField();
     private JTextField CCField = new JTextField();
 
+    private JComboBox mediaPlaylistTypeCBox = new JComboBox<>(new String[]{"Video", "Audio", "Closed Captions"});
 
     private JRadioButton rPlayVideoBtn = new JRadioButton("Whole Video");
     private JRadioButton rPlayPartBtn = new JRadioButton("Fixed Duration (sec):");
@@ -43,11 +50,9 @@ public class HlsSamplerPanel extends JPanel {
     private JRadioButton rMaximumBandwidth = new JRadioButton("Max");
     private JRadioButton rCustomBandwidth = new JRadioButton("Custom (bps): ");
 
-    private JRadioButton rNoAudio = new JRadioButton("None");
     private JRadioButton rDefaultAudio = new JRadioButton("Default");
     private JRadioButton rCustomAudio = new JRadioButton("Custom: ");
 
-    private JRadioButton rNoCC = new JRadioButton("None");
     private JRadioButton rDefaultCC = new JRadioButton("Default");
     private JRadioButton rCustomCC = new JRadioButton("Custom: ");
     
@@ -81,13 +86,11 @@ public class HlsSamplerPanel extends JPanel {
 
         audioGroup.add(rCustomAudio);
         audioGroup.add(rDefaultAudio);
-        audioGroup.add(rNoAudio);
-        rNoAudio.setSelected(true);
+        rDefaultAudio.setSelected(true);
 
         CCGroup.add(rCustomCC);
         CCGroup.add(rDefaultCC);
-        CCGroup.add(rNoCC);
-        rNoCC.setSelected(true);
+        rDefaultCC.setSelected(true);
 
         playSecondsField.setEnabled(true);
         rPlayPartBtn.addItemListener(e -> {
@@ -134,21 +137,53 @@ public class HlsSamplerPanel extends JPanel {
                     }
                 }
         );
+        mediaPlaylistTypeCBox.addItemListener(e -> {
+                    String mediaType = (String)e.getItem();
+                    MediaPlaylistTypePanel.removeAll();
+                    if(mediaType.equals("Video")){
+                        mediaPlaylistPanel = videoStreamSelectionPanel;
+                    } else if(mediaType.equals("Audio")){
+                        mediaPlaylistPanel = audioTrackSelectionPanel;
+                    } else if(mediaType.equals("Closed Captions")){
+                        mediaPlaylistPanel = closedCaptionTrackSelectionPanel;
+                    } else {
+                      //not good
+                    }
+                    GroupLayout MediaPlaylistTypePanelLayout = new javax.swing.GroupLayout(MediaPlaylistTypePanel);
+                    MediaPlaylistTypePanelLayout.setAutoCreateGaps(true);
+                    MediaPlaylistTypePanelLayout.setAutoCreateContainerGaps(true);
+                    MediaPlaylistTypePanel.setLayout(MediaPlaylistTypePanelLayout);
+                    MediaPlaylistTypePanelLayout.setHorizontalGroup(
+                            MediaPlaylistTypePanelLayout.createSequentialGroup()
+                                    .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                            javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(mediaPlaylistPanel)
+                    );
+                    MediaPlaylistTypePanelLayout.setVerticalGroup(
+                            MediaPlaylistTypePanelLayout.createParallelGroup()
+                                    .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                            javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(mediaPlaylistPanel)
+                    );
+                    repaint();
+                    revalidate();
+                }
+        );
 
-        videoPanel.setBorder(BorderFactory.createTitledBorder("Video"));
-        GroupLayout videoPanelLayout = new javax.swing.GroupLayout(videoPanel);
-        videoPanelLayout.setAutoCreateContainerGaps(true);
-        videoPanel.setLayout(videoPanelLayout);
-        videoPanelLayout.setHorizontalGroup(
-                videoPanelLayout.createSequentialGroup()
+        MasterPlaylistPanel.setBorder(BorderFactory.createTitledBorder("Master Play List"));
+        GroupLayout MasterPlaylistPanelLayout = new javax.swing.GroupLayout(MasterPlaylistPanel);
+        MasterPlaylistPanelLayout.setAutoCreateContainerGaps(true);
+        MasterPlaylistPanel.setLayout(MasterPlaylistPanelLayout);
+        MasterPlaylistPanelLayout.setHorizontalGroup(
+                MasterPlaylistPanelLayout.createSequentialGroup()
                         .addComponent(urlFieldLabel)
                         .addComponent(urlField)
                         .addComponent(rPlayVideoBtn)
                         .addComponent(rPlayPartBtn)
                         .addComponent(playSecondsField)
         );
-        videoPanelLayout.setVerticalGroup(
-                videoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        MasterPlaylistPanelLayout.setVerticalGroup(
+                MasterPlaylistPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(urlFieldLabel)
                         .addComponent(urlField, javax.swing.GroupLayout.PREFERRED_SIZE,
                                 javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -210,13 +245,12 @@ public class HlsSamplerPanel extends JPanel {
                         )
         );
 
-        audioOptions.setBorder(BorderFactory.createTitledBorder("Audio Track Selection"));
-        GroupLayout audioOptionsLayout = new javax.swing.GroupLayout(audioOptions);
+        audioTrackSelectionPanel.setBorder(BorderFactory.createTitledBorder("Track Selection"));
+        GroupLayout audioOptionsLayout = new javax.swing.GroupLayout(audioTrackSelectionPanel);
         audioOptionsLayout.setAutoCreateContainerGaps(true);
-        audioOptions.setLayout(audioOptionsLayout);
+        audioTrackSelectionPanel.setLayout(audioOptionsLayout);
         audioOptionsLayout.setHorizontalGroup(
                 audioOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(rNoAudio)
                         .addGroup(audioOptionsLayout.createSequentialGroup()
                                 .addComponent(rDefaultAudio)
                                 .addComponent(rCustomAudio)
@@ -227,7 +261,6 @@ public class HlsSamplerPanel extends JPanel {
         );
         audioOptionsLayout.setVerticalGroup(
                 audioOptionsLayout.createSequentialGroup()
-                        .addComponent(rNoAudio)
                         .addGroup(audioOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(rDefaultAudio)
                                 .addComponent(rCustomAudio)
@@ -236,13 +269,12 @@ public class HlsSamplerPanel extends JPanel {
                         )
         );
 
-        closedCaptionOptions.setBorder(BorderFactory.createTitledBorder("CC Track Selection"));
-        GroupLayout closedCaptionOptionsLayout = new javax.swing.GroupLayout(closedCaptionOptions);
+        closedCaptionTrackSelectionPanel.setBorder(BorderFactory.createTitledBorder("Track Selection"));
+        GroupLayout closedCaptionOptionsLayout = new javax.swing.GroupLayout(closedCaptionTrackSelectionPanel);
         closedCaptionOptionsLayout.setAutoCreateContainerGaps(true);
-        closedCaptionOptions.setLayout(closedCaptionOptionsLayout);
+        closedCaptionTrackSelectionPanel.setLayout(closedCaptionOptionsLayout);
         closedCaptionOptionsLayout.setHorizontalGroup(
                 closedCaptionOptionsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(rNoCC)
                         .addGroup(closedCaptionOptionsLayout.createSequentialGroup()
                                 .addComponent(rDefaultCC)
                                 .addComponent(rCustomCC)
@@ -253,7 +285,6 @@ public class HlsSamplerPanel extends JPanel {
         );
         closedCaptionOptionsLayout.setVerticalGroup(
                 closedCaptionOptionsLayout.createSequentialGroup()
-                        .addComponent(rNoCC)
                         .addGroup(closedCaptionOptionsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(rDefaultCC)
                                 .addComponent(rCustomCC)
@@ -262,7 +293,7 @@ public class HlsSamplerPanel extends JPanel {
                         )
         );
 
-        videoStreamSelectionPanel.setBorder(BorderFactory.createTitledBorder("Video Stream Selection"));
+        videoStreamSelectionPanel.setBorder(BorderFactory.createTitledBorder("Stream Selection"));
         GroupLayout videoStreamSelectionLayout = new javax.swing.GroupLayout(videoStreamSelectionPanel);
         videoStreamSelectionLayout.setAutoCreateGaps(true);
         videoStreamSelectionLayout.setAutoCreateContainerGaps(true);
@@ -278,20 +309,23 @@ public class HlsSamplerPanel extends JPanel {
                         .addComponent(resolutionOptions)
                 );
 
-        audioStreamSelectionPanel.setBorder(BorderFactory.createTitledBorder("Audio Stream Selection"));
-        GroupLayout audioStreamSelectionLayout = new javax.swing.GroupLayout(audioStreamSelectionPanel);
-        audioStreamSelectionLayout.setAutoCreateGaps(true);
-        audioStreamSelectionLayout.setAutoCreateContainerGaps(true);
-        audioStreamSelectionPanel.setLayout(audioStreamSelectionLayout);
-        audioStreamSelectionLayout.setHorizontalGroup(
-                audioStreamSelectionLayout.createSequentialGroup()
-                        .addComponent(audioOptions)
-                        .addComponent(closedCaptionOptions)
-                );
-        audioStreamSelectionLayout.setVerticalGroup(
-                audioStreamSelectionLayout.createParallelGroup()
-                .addComponent(audioOptions)
-                .addComponent(closedCaptionOptions)
+
+        MediaPlaylistTypePanel.setBorder(BorderFactory.createTitledBorder("Media Playlist"));
+        GroupLayout MediaPlaylistTypePanelLayout = new javax.swing.GroupLayout(MediaPlaylistTypePanel);
+        MediaPlaylistTypePanelLayout.setAutoCreateGaps(true);
+        MediaPlaylistTypePanelLayout.setAutoCreateContainerGaps(true);
+        MediaPlaylistTypePanel.setLayout(MediaPlaylistTypePanelLayout);
+        MediaPlaylistTypePanelLayout.setHorizontalGroup(
+                MediaPlaylistTypePanelLayout.createSequentialGroup()
+                        .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(mediaPlaylistPanel)
+        );
+        MediaPlaylistTypePanelLayout.setVerticalGroup(
+                MediaPlaylistTypePanelLayout.createParallelGroup()
+                        .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(mediaPlaylistPanel)
         );
 
 
@@ -301,15 +335,13 @@ public class HlsSamplerPanel extends JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(videoPanel)
-                        .addComponent(videoStreamSelectionPanel)
-                        .addComponent(audioStreamSelectionPanel)
+                        .addComponent(MasterPlaylistPanel)
+                        .addComponent(MediaPlaylistTypePanel)
         );
         layout.setVerticalGroup(
                 layout.createSequentialGroup()
-                        .addComponent(videoPanel)
-                        .addComponent(videoStreamSelectionPanel)
-                        .addComponent(audioStreamSelectionPanel)
+                        .addComponent(MasterPlaylistPanel)
+                        .addComponent(MediaPlaylistTypePanel)
         );
 
     }
