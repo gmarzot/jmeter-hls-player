@@ -149,59 +149,12 @@ public class HlsSamplerTest {
 		assertEquals("GET  http://www.mock.com/path\n\n\n\n\n", result.getRequestHeaders());
 		assertEquals(true, result.isSuccessful());
 		assertEquals("OK", result.getResponseMessage());
-		assertEquals("Test", result.getSampleLabel());
+		assertEquals("master", result.getSampleLabel());
 		assertEquals("headerKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", result.getResponseHeaders());
 		assertEquals(new String(payload1.getBytes(), "UTF-8"), new String(result.getResponseData(), "UTF-8"));
 		assertEquals("200", result.getResponseCode());
 		assertEquals("application/json;charset=UTF-8", result.getContentType());
 		assertEquals("UTF-8", result.getDataEncodingNoDefault());
-
-		SampleResult[] subresults  = result.getSubResults();
-		assertEquals("GET  http://www.mock.com/path/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n\n\n\n\n", subresults[0].getRequestHeaders());
-		assertEquals(true, subresults[0].isSuccessful());
-		assertEquals("OK", subresults[0].getResponseMessage());
-		assertEquals("600k.m3u8?preroll=Thousands&uniqueId=4df94b1d", subresults[0].getSampleLabel());
-		assertEquals("headerKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", subresults[0].getResponseHeaders());
-		assertEquals(new String(payload2.getBytes(), "UTF-8"), new String(subresults[0].getResponseData(), "UTF-8"));
-		assertEquals("200", subresults[0].getResponseCode());
-		assertEquals("application/json;charset=UTF-8", subresults[0].getContentType());
-		assertEquals("UTF-8", subresults[0].getDataEncodingNoDefault());
-
-		SampleResult[] subsubresults  = subresults[0].getSubResults();
-
-		assertEquals("GET  https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_1.ts\n\n\n\n\n", subsubresults[0].getRequestHeaders());
-		assertEquals(true, subsubresults[0].isSuccessful());
-		assertEquals("OK", subsubresults[0].getResponseMessage());
-		assertEquals("Thousands-320k_1.ts", subsubresults[0].getSampleLabel());
-		assertEquals("URL: https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_1.ts\nheaderKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", subsubresults[0].getResponseHeaders());
-		assertEquals("200", subsubresults[0].getResponseCode());
-		assertEquals("application/json;charset=UTF-8", subsubresults[0].getContentType());
-		assertEquals("UTF-8", subsubresults[0].getDataEncodingNoDefault());
-
-		assertEquals("GET  https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_2.ts\n\n\n\n\n", subsubresults[1].getRequestHeaders());
-		assertEquals(true, subsubresults[1].isSuccessful());
-		assertEquals("OK", subsubresults[1].getResponseMessage());
-		assertEquals("Thousands-320k_2.ts", subsubresults[1].getSampleLabel());
-		assertEquals("URL: https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_2.ts\nheaderKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", subsubresults[1].getResponseHeaders());
-		assertEquals("200", subsubresults[1].getResponseCode());
-		assertEquals("application/json;charset=UTF-8", subsubresults[1].getContentType());
-		assertEquals("UTF-8", subsubresults[1].getDataEncodingNoDefault());
-
-		assertEquals("GET  https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_3.ts\n\n\n\n\n", subsubresults[2].getRequestHeaders());
-		assertEquals(true, subsubresults[2].isSuccessful());
-		assertEquals("OK", subsubresults[2].getResponseMessage());
-		assertEquals("Thousands-320k_3.ts", subsubresults[2].getSampleLabel());
-		assertEquals("URL: https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_3.ts\nheaderKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", subsubresults[2].getResponseHeaders());
-		assertEquals("200", subsubresults[2].getResponseCode());
-		assertEquals("application/json;charset=UTF-8", subsubresults[2].getContentType());
-		assertEquals("UTF-8", subsubresults[2].getDataEncodingNoDefault());
-
-
-
-
-
-
-
 
 	}
 

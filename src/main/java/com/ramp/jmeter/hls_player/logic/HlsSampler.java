@@ -41,8 +41,8 @@ public class HlsSampler extends AbstractSampler {
     private String playlistPath = null;
     private String playlist = null;
     
-	private DataRequest playlistResponse = null;
-	private SampleResult playlistResult = null;
+    private DataRequest playlistResponse = null;
+    private SampleResult playlistResult = null;
 	
     private boolean isLive = false; // does not have an end tag
     private int targetDuration = 0; // HLS target duration
