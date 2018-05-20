@@ -1,4 +1,4 @@
-package com.blazemeter.jmeter.hls.gui;
+package com.ramp.jmeter.hls-player.gui;
 
 import com.blazemeter.jmeter.hls.logic.HlsSampler;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
