@@ -1,4 +1,4 @@
-package com.blazemeter.jmeter.hls.logic;
+package com.ramp.jmeter.hls_player.logic;
 
 public class DataSegment {
 	private String duration;
