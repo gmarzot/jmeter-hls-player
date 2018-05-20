@@ -1,4 +1,4 @@
-package com.ramp.jmeter.hls-player.logic;
+package com.ramp.jmeter.hls_player.logic;
 
 import java.util.List;
 import java.util.Map;
