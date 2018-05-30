@@ -23,7 +23,7 @@ import java.lang.Math;
 import java.lang.Float;
 import java.lang.Thread;
 
-public class HlsSampler extends AbstractSampler {
+public class MediaPlaylistSampler extends AbstractSampler {
     public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
     public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
     public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
@@ -54,14 +54,14 @@ public class HlsSampler extends AbstractSampler {
     private List<DataSegment> segments = new ArrayList<>();
     private ArrayList<String> segmentsFetched = new ArrayList<>();
 
-    public HlsSampler() {
-	super();
-	setName("HLS Player Sampler");
-	parser = new Parser();
+    public MediaPlaylistSampler() {
+		super();
+		setName("HLS Media Playlist Sampler");
+		parser = new Parser();
     }
 
     public HeaderManager getHeaderManager() {
-	return (HeaderManager) getProperty(HlsSampler.HEADER_MANAGER).getObjectValue();
+	return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
     }
 
     private DataRequest getMasterList(SampleResult masterResult, Parser parser) throws IOException {

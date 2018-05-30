@@ -2,11 +2,7 @@ package com.ramp.jmeter.hls_player.logic;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,11 +14,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 
-public class HlsSamplerTest {
+public class MediaPlaylistSamplerTest {
 	
 	
 
-	private HlsSampler sampler;
+	private MediaPlaylistSampler sampler;
 	private Parser parserMock;
 	
 	@Before
@@ -31,7 +27,7 @@ public class HlsSamplerTest {
 //        TestJMeterUtils.createJmeterEnv();
 		
         parserMock = Mockito.mock(Parser.class);
-        sampler = new HlsSampler();
+        sampler = new MediaPlaylistSampler();
 		sampler.setURLData("http://www.mock.com/path");
 		sampler.setResData("640x360");
 		sampler.setNetworkData("1395723");
