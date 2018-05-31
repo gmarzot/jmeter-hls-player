@@ -4,10 +4,14 @@ import com.ramp.jmeter.hls_player.logic.PlayerTestElement;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.NullProperty;
+import org.apache.jorphan.logging.LoggingManager;
+import org.apache.log.Logger;
 
 import java.awt.*;
+import java.util.Iterator;
 
 public class PlayerTestElementGui extends AbstractSamplerGui{
+    private static final Logger log = LoggingManager.getLoggerForClass();
 
     private PlayerTestElementPanel PlayerTestElementPanel;
 
@@ -52,8 +56,12 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
         PlayerTestElementPanel.masterPlaylistPanel.customDurationTextField.setText(playerTestElement.getPropertyAsString("CUSTOM_DURATION"));
 
         for (int i = 0; isNextMediaPlaylistSamplerSettings(playerTestElement, i); i++){
-            MediaPlaylistSamplerPanel panel = new MediaPlaylistSamplerPanel();
-            PlayerTestElementPanel.mediaPlaylistPanels.add(panel);
+            log.info("Configuring gui for media playlist #"+i);
+            MediaPlaylistSamplerPanel panel = PlayerTestElementPanel.mediaPlaylistPanels.get(i);
+            if (panel == null){
+                panel = new MediaPlaylistSamplerPanel();
+                PlayerTestElementPanel.mediaPlaylistPanels.add(panel);
+            }
             panel.setMediaPlaylistType(playerTestElement.getPropertyAsString(i+"_MEDIA_PLAYLIST_TYPE"));
             switch (panel.getMediaPlaylistType()) {
                 case "Video":
@@ -68,14 +76,14 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
                     break;
                 case "Audio":
                     String customAudio = playerTestElement.getPropertyAsString(i+"_CUSTOM_AUDIO", "def");
-                    if(!customAudio.equals("def"))
+                    if(customAudio.equals("def"))
                         panel.setDefaultAudio();
                     else
                         panel.setCustomAudio(customAudio);
                     break;
                 case "Closed Captions":
                     String customCC = playerTestElement.getPropertyAsString(i+"_CUSTOM_CC", "def");
-                    if(!customCC.equals("def"))
+                    if(customCC.equals("def"))
                         panel.setDefaultCC();
                     else
                         panel.setCustomCC(customCC);
@@ -87,7 +95,7 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
     }
 
     private boolean isNextMediaPlaylistSamplerSettings(PlayerTestElement playerTestElement, int index) {
-        return !(playerTestElement.getProperty(index + "_MEDIA_PLAYLIST_TYPE") instanceof NullProperty);
+        return (playerTestElement.getPropertyAsString(index + "_MEDIA_PLAYLIST_TYPE", "def") != "def");
     }
 
     @Override
@@ -100,8 +108,10 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
             testElement.setProperty("CUSTOM_DURATION", PlayerTestElementPanel.masterPlaylistPanel.customDurationTextField.getText());
 
             //Media Playlist Saving
-            for (int i = 0; i < PlayerTestElementPanel.mediaPlaylistPanels.size(); i++) {
-                MediaPlaylistSamplerPanel panel = PlayerTestElementPanel.mediaPlaylistPanels.get(i);
+            Iterator<MediaPlaylistSamplerPanel> panelIterator = PlayerTestElementPanel.mediaPlaylistPanels.iterator();
+            for (int i = 0; panelIterator.hasNext(); i++) {
+                log.info("Saving from gui for media playlist #"+i);
+                MediaPlaylistSamplerPanel panel = panelIterator.next();
                 testElement.setProperty(i+"_MEDIA_PLAYLIST_TYPE",panel.getMediaPlaylistType());
                 switch (panel.getMediaPlaylistType()) {
                     case "Video":

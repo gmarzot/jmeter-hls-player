@@ -25,11 +25,18 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <com.ramp.jmeter.hls__player.logic.HLSPlayerTestElement guiclass="com.ramp.jmeter.hls_player.gui.HLSPlayerTestElementGui" testclass="com.ramp.jmeter.hls_player.logic.HLSPlayerTestElement" testname="HLS Player" enabled="true">
-          <stringProp name="MASTER_PLAYLIST_URL">http://local.test.org</stringProp>
-          <boolProp name="IS_WHOLE_VIDEO">false</boolProp>
-          <stringProp name="CUSTOM_DURATION">123</stringProp>
-        </com.ramp.jmeter.hls__player.logic.HLSPlayerTestElement>
+        <com.ramp.jmeter.hls__player.logic.PlayerTestElement guiclass="com.ramp.jmeter.hls_player.gui.PlayerTestElementGui" testclass="com.ramp.jmeter.hls_player.logic.PlayerTestElement" testname="HLS Player" enabled="true">
+          <stringProp name="MASTER_PLAYLIST_URL"></stringProp>
+          <boolProp name="IS_WHOLE_VIDEO">true</boolProp>
+          <stringProp name="CUSTOM_DURATION"></stringProp>
+          <stringProp name="0_MEDIA_PLAYLIST_TYPE">Audio</stringProp>
+          <stringProp name="0_BANDWIDTH_OPTION">maxBandwidth</stringProp>
+          <stringProp name="0_RESOLUTION_OPTION">minResolution</stringProp>
+          <stringProp name="1_MEDIA_PLAYLIST_TYPE">Video</stringProp>
+          <stringProp name="1_BANDWIDTH_OPTION">minBandwidth</stringProp>
+          <stringProp name="1_RESOLUTION_OPTION">minResolution</stringProp>
+          <stringProp name="0_CUSTOM_AUDIO">def</stringProp>
+        </com.ramp.jmeter.hls__player.logic.PlayerTestElement>
         <hashTree/>
       </hashTree>
     </hashTree>
