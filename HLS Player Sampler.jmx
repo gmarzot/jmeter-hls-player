@@ -35,7 +35,7 @@
           <stringProp name="1_MEDIA_PLAYLIST_TYPE">Video</stringProp>
           <stringProp name="1_BANDWIDTH_OPTION">minBandwidth</stringProp>
           <stringProp name="1_RESOLUTION_OPTION">minResolution</stringProp>
-          <stringProp name="0_CUSTOM_AUDIO">def</stringProp>
+          <stringProp name="0_CUSTOM_AUDIO">123</stringProp>
         </com.ramp.jmeter.hls__player.logic.PlayerTestElement>
         <hashTree/>
       </hashTree>

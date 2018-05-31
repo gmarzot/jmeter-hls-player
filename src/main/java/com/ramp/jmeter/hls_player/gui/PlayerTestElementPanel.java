@@ -32,7 +32,7 @@ public class PlayerTestElementPanel extends JPanel {
         });
     }
 
-    private void setupLayouts() {
+    void setupLayouts() {
         //Layouts
         GroupLayout layout = new GroupLayout(this);
         layout.setAutoCreateGaps(true);

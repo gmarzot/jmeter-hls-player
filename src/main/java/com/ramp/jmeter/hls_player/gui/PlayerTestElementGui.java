@@ -57,7 +57,9 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
 
         for (int i = 0; isNextMediaPlaylistSamplerSettings(playerTestElement, i); i++){
             log.info("Configuring gui for media playlist #"+i);
-            MediaPlaylistSamplerPanel panel = PlayerTestElementPanel.mediaPlaylistPanels.get(i);
+            MediaPlaylistSamplerPanel panel = null;
+            if(i < PlayerTestElementPanel.mediaPlaylistPanels.size())
+                panel = PlayerTestElementPanel.mediaPlaylistPanels.get(i);
             if (panel == null){
                 panel = new MediaPlaylistSamplerPanel();
                 PlayerTestElementPanel.mediaPlaylistPanels.add(panel);
@@ -92,6 +94,9 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
                     break;
             }
         }
+        PlayerTestElementPanel.setupLayouts();
+        PlayerTestElementPanel.repaint();
+        PlayerTestElementPanel.revalidate();
     }
 
     private boolean isNextMediaPlaylistSamplerSettings(PlayerTestElement playerTestElement, int index) {
