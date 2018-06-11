@@ -259,6 +259,10 @@ public class HlsSampler extends AbstractSampler {
 	return this.getPropertyAsString("HLS.URL_DATA");
     }
 
+    public String getMediaPlaylistType() {
+    	return this.getPropertyAsString("HLS.PLAYLIST_TYPE");
+	}
+
     public String getRESDATA() {
 	return this.getPropertyAsString("HLS.RES_DATA");
     }
@@ -299,6 +303,10 @@ public class HlsSampler extends AbstractSampler {
 
 	this.setProperty("HLS.URL_DATA", url);
     }
+
+    public void setMediaPlaylistType(String playlistType){
+    	this.setProperty("HLS.PLAYLIST_TYPE", playlistType);
+	}
 
     public void setResData(String res) {
 

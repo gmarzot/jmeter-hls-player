@@ -354,6 +354,14 @@ public class HlsSamplerPanel extends JPanel {
         return urlField.getText();
     }
 
+    public void setMediaPlaylistType(String playlistType){
+        mediaPlaylistTypeCBox.setSelectedItem(playlistType);
+    }
+
+    public String getMediaPlaylistType(){
+        return (String)mediaPlaylistTypeCBox.getSelectedItem();
+    }
+
     public void setResData(String resData) {
         resolutionField.setText(resData);
     }

@@ -40,6 +40,7 @@ public class HlsSamplerGui extends AbstractSamplerGui {
 		super.configure(el);
 		HlsSampler sampler = (HlsSampler) el;
 		hlsSamplerPanel.setUrlData(sampler.getURLData());
+		hlsSamplerPanel.setMediaPlaylistType(sampler.getMediaPlaylistType());
 		hlsSamplerPanel.setResData(sampler.getRESDATA());
 		{
 			String temp = sampler.getPlAYSecondsData();
@@ -58,6 +59,7 @@ public class HlsSamplerGui extends AbstractSamplerGui {
 		if (s instanceof HlsSampler) {
 			HlsSampler sampler = (HlsSampler) s;
 			sampler.setURLData(hlsSamplerPanel.getUrlData());
+			sampler.setMediaPlaylistType(hlsSamplerPanel.getMediaPlaylistType());
 			sampler.setResData(hlsSamplerPanel.getResData());
 			sampler.setPlaySecondsData(hlsSamplerPanel.getPlaySecondsData());
 			sampler.setHlsDuration(hlsSamplerPanel.isChecked());
