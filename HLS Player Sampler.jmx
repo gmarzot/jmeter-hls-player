@@ -27,15 +27,14 @@
       <hashTree>
         <com.ramp.jmeter.hls__player.logic.PlayerTestElement guiclass="com.ramp.jmeter.hls_player.gui.PlayerTestElementGui" testclass="com.ramp.jmeter.hls_player.logic.PlayerTestElement" testname="HLS Player" enabled="true">
           <stringProp name="MASTER_PLAYLIST_URL"></stringProp>
-          <boolProp name="IS_WHOLE_VIDEO">true</boolProp>
+          <boolProp name="IS_CUSTOM_DURATION">false</boolProp>
           <stringProp name="CUSTOM_DURATION"></stringProp>
-          <stringProp name="0_MEDIA_PLAYLIST_TYPE">Audio</stringProp>
-          <stringProp name="0_BANDWIDTH_OPTION">maxBandwidth</stringProp>
-          <stringProp name="0_RESOLUTION_OPTION">minResolution</stringProp>
-          <stringProp name="1_MEDIA_PLAYLIST_TYPE">Video</stringProp>
-          <stringProp name="1_BANDWIDTH_OPTION">minBandwidth</stringProp>
-          <stringProp name="1_RESOLUTION_OPTION">minResolution</stringProp>
-          <stringProp name="0_CUSTOM_AUDIO">123</stringProp>
+          <intProp name="SAMPLER_COUNT">1</intProp>
+          <elementProp name="MEDIA_PLAYLIST_SAMPLER0" elementType="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" guiclass="com.ramp.jmeter.hls_player.gui.PlayerTestElementGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="HLS Player" enabled="true">
+            <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Video</stringProp>
+            <stringProp name="HLS.BANDWIDTH_OPTION">MIN</stringProp>
+            <stringProp name="HLS.RESOLUTION_OPTION">MIN</stringProp>
+          </elementProp>
         </com.ramp.jmeter.hls__player.logic.PlayerTestElement>
         <hashTree/>
       </hashTree>

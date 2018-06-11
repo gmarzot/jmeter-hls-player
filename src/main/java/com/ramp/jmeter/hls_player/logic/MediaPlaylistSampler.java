@@ -27,9 +27,31 @@ public class MediaPlaylistSampler extends AbstractSampler {
     public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
     public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
     public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
-    private static final Logger log = LoggingManager.getLoggerForClass();
+	private static final Logger log = LoggingManager.getLoggerForClass();
 
-    private Parser parser;
+	public static final String CUSTOM = "CUSTOM";
+	public static final String MIN = "MIN";
+	public static final String MAX = "MAX";
+
+	public static final String MASTER_PLAYLIST_URL = "HLS.MASTER_PLAYLIST_URL";
+	public static final String MEDIA_PLAYLIST_TYPE = "HLS.MEDIA_PLAYLIST_TYPE";
+	public static final String IS_CUSTOM_DURATION = "HLS.IS_CUSTOM_DURATION";
+	public static final String CUSTOM_DURATION = "HLS.CUSTOM_DURATION";
+	//Video
+	public static final String RESOLUTION_OPTION = "HLS.RESOLUTION_OPTION";
+	public static final String CUSTOM_RESOLUTION = "HLS.CUSTOM_RESOLUTION";
+	public static final String BANDWIDTH_OPTION = "HLS.BANDWIDTH_OPTION";
+	public static final String CUSTOM_BANDWIDTH = "HLS.CUSTOM_BANDWIDTH";
+	//Audio
+	public static final String CUSTOM_AUDIO = "HLS.CUSTOM_AUDIO";
+	//Closed Captions
+	public static final String CUSTOM_CC = "HLS.CUSTOM_CC";
+	public static final String TYPE_VIDEO = "Video";
+	public static final String TYPE_AUDIO = "Audio";
+	public static final String TYPE_CLOSED_CAPTIONS = "Closed Captions";
+
+
+	private Parser parser;
 
     private int durationSeconds = 0; // configured video duration
 
@@ -256,90 +278,59 @@ public class MediaPlaylistSampler extends AbstractSampler {
     }
 
     public String getURLData() {
-	return this.getPropertyAsString("HLS.URL_DATA");
+	return this.getPropertyAsString(MASTER_PLAYLIST_URL);
     }
 
     public String getRESDATA() {
-	return this.getPropertyAsString("HLS.RES_DATA");
+	return this.getPropertyAsString(CUSTOM_RESOLUTION);
     }
 
     public String getNetwordData() {
-	return this.getPropertyAsString("HLS.NET_DATA");
+	return this.getPropertyAsString(CUSTOM_BANDWIDTH);
     }
 
     public String getPlAYSecondsData() {
-	return this.getPropertyAsString("HLS.SECONDS_DATA");
+	return this.getPropertyAsString(CUSTOM_DURATION);
     }
 
     public boolean getVideoDuration() {
-	return this.getPropertyAsBoolean("HLS.DURATION");
-    }
-
-    public String getVideoType() {
-	return this.getPropertyAsString("HLS.VIDEOTYPE");
+	return this.getPropertyAsBoolean(IS_CUSTOM_DURATION);
     }
 
     public String getResolutionType() {
-	return this.getPropertyAsString("HLS.RESOLUTION_TYPE");
+	return this.getPropertyAsString(RESOLUTION_OPTION);
     }
 
     public String getBandwidthType() {
-	return this.getPropertyAsString("HLS.BANDWIDTH_TYPE");
-    }
-
-    public String getHlsVideoType() {
-	return this.getPropertyAsString("HLS.VIDEOTYPE");
-    }
-
-    public String getPRotocol() {
-	return this.getPropertyAsString("HLS.PROTOCOL");
+	return this.getPropertyAsString(BANDWIDTH_OPTION);
     }
 
     public void setURLData(String url) {
-
-	this.setProperty("HLS.URL_DATA", url);
+	this.setProperty(MASTER_PLAYLIST_URL, url);
     }
 
     public void setResData(String res) {
-
-	this.setProperty("HLS.RES_DATA", res);
+	this.setProperty(CUSTOM_RESOLUTION, res);
     }
 
     public void setNetworkData(String net) {
-	this.setProperty("HLS.NET_DATA", net);
+	this.setProperty(CUSTOM_BANDWIDTH, net);
     }
 
     public void setVideoDuration(boolean res) {
-	this.setProperty("HLS.DURATION", res);
+	this.setProperty(IS_CUSTOM_DURATION, res);
     }
 
     public void setPlaySecondsData(String seconds) {
-
-	this.setProperty("HLS.SECONDS_DATA", seconds);
-    }
-
-    public void setPRotocol(String protocolValue) {
-	this.setProperty("HLS.PROTOCOL", protocolValue);
-    }
-
-    public void setHlsDuration(String duration) {
-	this.setProperty("HLS.DURATION", duration);
+	this.setProperty(CUSTOM_DURATION, seconds);
     }
 
     public void setResolutionType(String type) {
-	this.setProperty("HLS.RESOLUTION_TYPE", type);
+	this.setProperty(RESOLUTION_OPTION, type);
     }
 
     public void setBandwidthType(String type) {
-	this.setProperty("HLS.BANDWIDTH_TYPE", type);
-    }
-
-    public void setHlsVideoType(String type) {
-	this.setProperty("HLS.VIDEOTYPE", type);
-    }
-
-    public void setUrlVideoType(String type) {
-	this.setProperty("HLS.URLVIDEOTYPE", type);
+	this.setProperty(BANDWIDTH_OPTION, type);
     }
 
     public SampleResult getSegment(Parser parser, DataSegment seg, String url) {

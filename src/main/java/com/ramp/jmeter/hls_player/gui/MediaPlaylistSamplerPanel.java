@@ -1,5 +1,7 @@
 package com.ramp.jmeter.hls_player.gui;
 
+import com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler;
+
 import javax.swing.*;
 
 import java.awt.event.ItemEvent;
@@ -349,9 +351,9 @@ public class MediaPlaylistSamplerPanel extends JPanel {
     }
 
     public void setResolutionType(String check) {
-        if (check.equalsIgnoreCase("minResolution"))
+        if (check.equals(MediaPlaylistSampler.MIN))
             rMinimumResolution.setSelected(true);
-        else if (check.equalsIgnoreCase("maxResolution"))
+        else if (check.equals(MediaPlaylistSampler.MAX))
             rMaximumResolution.setSelected(true);
         else
             rCustomResolution.setSelected(true);
@@ -359,52 +361,33 @@ public class MediaPlaylistSamplerPanel extends JPanel {
     }
 
     public void setBandwidthType(String check) {
-        if (check.equalsIgnoreCase("minBandwidth"))
+        if (check.equals(MediaPlaylistSampler.MIN))
             rMinimumBandwidth.setSelected(true);
-        else if (check.equalsIgnoreCase("maxBandwidth"))
+        else if (check.equals(MediaPlaylistSampler.MAX))
             rMaximumBandwidth.setSelected(true);
         else
             rCustomBandwidth.setSelected(true);
 
     }
 
-    public String isChecked() {
-        if (rPlayVideoBtn.isSelected()) {
-
-            return "-1";
-
-        } else {
-
-            return getPlaySecondsData();
-        }
-    }
-
     public String getResolutionType() {
         if (rCustomResolution.isSelected()) {
-            return "customResolution";
+            return MediaPlaylistSampler.CUSTOM;
         } else if (rMinimumResolution.isSelected()) {
-            return "minResolution";
+            return MediaPlaylistSampler.MIN;
         } else
-            return "maxResolution";
+            return MediaPlaylistSampler.MAX;
     }
 
     public String getBandwidthType() {
         if (rCustomBandwidth.isSelected()) {
-            return "customBandwidth";
+            return MediaPlaylistSampler.CUSTOM;
         } else if (rMinimumBandwidth.isSelected()) {
-            return "minBandwidth";
+            return MediaPlaylistSampler.MIN;
         } else
-            return "maxBandwidth";
+            return MediaPlaylistSampler.MAX;
     }
 
-    public String videoType() {
-        //This method is not supported. video type is determined by the playlist
-        return "vod";
-    }
-
-    public boolean rDurationVideoButtoncheck() {
-        return rPlayVideoBtn.isSelected();
-    }
 
     public boolean isDefaultAudio() {
         return rDefaultAudio.isSelected();

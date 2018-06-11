@@ -31,10 +31,8 @@ public class MediaPlaylistSamplerTest {
 		sampler.setURLData("http://www.mock.com/path");
 		sampler.setResData("640x360");
 		sampler.setNetworkData("1395723");
-		sampler.setBandwidthType("customBandwidth");
-		sampler.setResolutionType("customResolution");
-		sampler.setUrlVideoType("Bandwidth");
-		sampler.setPRotocol("https");
+		sampler.setBandwidthType(MediaPlaylistSampler.MAX);
+		sampler.setResolutionType(MediaPlaylistSampler.CUSTOM);
 		sampler.setPlaySecondsData("20");
 		sampler.setVideoDuration(true);
 		sampler.setParser(parserMock);
