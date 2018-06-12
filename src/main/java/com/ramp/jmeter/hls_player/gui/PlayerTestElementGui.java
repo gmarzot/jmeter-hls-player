@@ -56,7 +56,6 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
 
     @Override
     public void configure(TestElement el) {
-        log.info("CONFIGURE");
         super.configure(el);
         PlayerTestElement playerTestElement = (PlayerTestElement) el;
         //Master Playlist Setup
@@ -66,9 +65,9 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
 
 
         Iterator<MediaPlaylistSamplerPanel> panelIterator = PlayerTestElementPanel.mediaPlaylistPanels.iterator();
-        for (int i =0;i < playerTestElement.getPropertyAsInt(PlayerTestElement.SAMPLER_COUNT); i ++) {
+        int samplerCount = playerTestElement.getPropertyAsInt(PlayerTestElement.SAMPLER_COUNT);
+        for (int i = 0; i < samplerCount; i ++) {
             MediaPlaylistSampler sampler = (MediaPlaylistSampler) playerTestElement.getProperty(PlayerTestElement.MEDIA_PLAYLIST_SAMPLER+i).getObjectValue();
-            log.info("Configuring gui for media playlist");
             MediaPlaylistSamplerPanel panel;
             if(panelIterator!=null&&panelIterator.hasNext())
                 panel = panelIterator.next();
@@ -116,7 +115,6 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
 
     @Override
     public void modifyTestElement(TestElement testElement) {
-        log.info("MODIFY_TEST_ELEMENT");
         this.configureTestElement(testElement);
         if (testElement instanceof PlayerTestElement) {
             //Master Playlist Saving
@@ -127,19 +125,18 @@ public class PlayerTestElementGui extends AbstractSamplerGui{
             //Media Playlist Saving
             Iterator<MediaPlaylistSamplerPanel> panelIterator = PlayerTestElementPanel.mediaPlaylistPanels.iterator();
             PlayerTestElement playerTestElement = (PlayerTestElement) testElement;
-            Iterator<MediaPlaylistSampler> samplerIterator = playerTestElement.MediaPlaylistSamplers.iterator();
+            int samplerCount = playerTestElement.getPropertyAsInt(PlayerTestElement.SAMPLER_COUNT);
             int i;
             for (i = 0;panelIterator.hasNext(); i++) {
-                log.info("Saving from gui for media playlist");
                 MediaPlaylistSamplerPanel panel = panelIterator.next();
                 MediaPlaylistSampler sampler;
-                if (samplerIterator!=null && samplerIterator.hasNext())
-                    sampler = samplerIterator.next();
+                if (i < samplerCount)
+                    sampler = (MediaPlaylistSampler) playerTestElement.getProperty(PlayerTestElement.MEDIA_PLAYLIST_SAMPLER+i).getObjectValue();
                 else {
-                    samplerIterator = null;
                     sampler = new MediaPlaylistSampler();
-                    this.configureTestElement(sampler);
-                    playerTestElement.MediaPlaylistSamplers.add(sampler);
+                    //this.configureTestElement(sampler);
+                    sampler.setProperty("TestElement.test_class", sampler.getClass().getName());
+                    sampler.setEnabled(true);
                 }
 
                 sampler.setProperty(MediaPlaylistSampler.MEDIA_PLAYLIST_TYPE,panel.getMediaPlaylistType());
