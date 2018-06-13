@@ -457,4 +457,35 @@ public class HlsSamplerPanel extends JPanel {
         return rPlayVideoBtn.isSelected();
     }
 
+    public String getCustomAuido() {
+        if (rCustomAudio.isSelected()) {
+            return audioField.getText();
+        }
+        return "";
+    }
+
+    public void setCustomAudio(String s){
+        if (s.length() != 0){
+            audioField.setText(s);
+            rDefaultAudio.setSelected(true);
+        } else {
+            rDefaultAudio.setSelected(true);
+        }
+    }
+
+    public String getCustomCC() {
+        if (rCustomCC.isSelected()) {
+            return CCField.getText();
+        }
+        return "";
+    }
+
+    public void setCustomCC(String s) {
+        if (s.length() != 0){
+            CCField.setText(s);
+            rCustomCC.setSelected(true);
+        }else {
+            rDefaultCC.setSelected(true);
+        }
+    }
 }

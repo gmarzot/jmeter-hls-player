@@ -2,11 +2,7 @@ package com.ramp.jmeter.hls_player.logic;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,7 +131,7 @@ public class HlsSamplerTest {
 			.thenReturn(respond4)
 			.thenReturn(respond5);
 
-		Mockito.when(parserMock.selectMediaPlaylist(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class)))
+		Mockito.when(parserMock.selectVideoPlaylist(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class)))
 			.thenReturn("/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d");
 		Mockito.when(parserMock.extractSegmentUris(Mockito.any()))
 				.thenReturn(fragments);
