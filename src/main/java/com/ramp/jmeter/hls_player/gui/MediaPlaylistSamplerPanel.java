@@ -18,20 +18,12 @@ public class MediaPlaylistSamplerPanel extends JPanel {
 
     private JPanel closedCaptionTrackSelectionPanel = new JPanel();
 
-    private JLabel urlFieldLabel = new JLabel("URL  ");
-
-    private JTextField urlField = new JTextField();
     private JTextField resolutionField = new JTextField();
-    private JTextField playSecondsField = new JTextField();
     private JTextField bandwidthField = new JTextField();
     private JTextField audioField = new JTextField();
     private JTextField CCField = new JTextField();
 
     private JComboBox mediaPlaylistTypeCBox = new JComboBox<>(new String[]{"Video", "Audio", "Closed Captions"});
-    private JButton deleteButton = new JButton("X");
-
-    private JRadioButton rPlayVideoBtn = new JRadioButton("Whole Video");
-    private JRadioButton rPlayPartBtn = new JRadioButton("Fixed Duration (sec):");
 
     private JRadioButton rMinimumResolution = new JRadioButton("Min");
     private JRadioButton rMaximumResolution = new JRadioButton("Max");
@@ -47,7 +39,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
     private JRadioButton rDefaultCC = new JRadioButton("Default");
     private JRadioButton rCustomCC = new JRadioButton("Custom: ");
     
-    private ButtonGroup durationGroup = new ButtonGroup();
     private ButtonGroup resolGroup = new ButtonGroup();
     private ButtonGroup bandGroup = new ButtonGroup();
     private ButtonGroup audioGroup = new ButtonGroup();
@@ -60,12 +51,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
     }
 
     private void initComponents() {
-
-        urlFieldLabel.setLabelFor(urlField);
-
-        durationGroup.add(rPlayVideoBtn);
-        durationGroup.add(rPlayPartBtn);
-        rPlayPartBtn.setSelected(true);
 
         resolGroup.add(rCustomResolution);
         resolGroup.add(rMaximumResolution);
@@ -85,15 +70,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
         CCGroup.add(rDefaultCC);
         rDefaultCC.setSelected(true);
 
-        playSecondsField.setEnabled(true);
-        rPlayPartBtn.addItemListener(e -> {
-                    if (e.getStateChange() == ItemEvent.SELECTED) {
-                        playSecondsField.setEnabled(true);
-                    } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                        playSecondsField.setEnabled(false);
-                    }
-                }
-        );
         bandwidthField.setEnabled(false);
         rCustomBandwidth.addItemListener(e -> {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -276,10 +252,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
                                         javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
-                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(deleteButton)
-
                         )
                         .addComponent(mediaPlaylistPanel)
         );
@@ -288,7 +260,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
                         .addGroup(layout.createParallelGroup()
                                 .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
                                         javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(deleteButton)
                         )
                         .addComponent(mediaPlaylistPanel)
         );
@@ -305,14 +276,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
     }
 
     //old functions
-    public void setUrlData(String urlData) {
-        urlField.setText(urlData);
-    }
-
-    public String getUrlData() {
-        return urlField.getText();
-    }
-
     public void setCustomResolution(String resData) {
         resolutionField.setText(resData);
     }
@@ -329,26 +292,6 @@ public class MediaPlaylistSamplerPanel extends JPanel {
         return bandwidthField.getText();
     }
 
-    public void setPlaySecondsData(String seconds) {
-        playSecondsField.setText(seconds);
-    }
-
-    public String getPlaySecondsData() {
-        return playSecondsField.getText();
-    }
-
-    public void setVideoDuration(boolean check) {
-        rPlayPartBtn.setSelected(check);
-    }
-
-    public boolean getVideoDuration() {
-        return rPlayPartBtn.isSelected();
-    }
-
-    public void setVideoType(String check) {
-
-        //doesn't do anything anymore. Video type determined by playlist
-    }
 
     public void setResolutionType(String check) {
         if (check.equals(MediaPlaylistSampler.MIN))

@@ -25,22 +25,93 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <com.ramp.jmeter.hls__player.logic.PlayerTestElement guiclass="com.ramp.jmeter.hls_player.gui.PlayerTestElementGui" testclass="com.ramp.jmeter.hls_player.logic.PlayerTestElement" testname="HLS Player" enabled="true">
-          <stringProp name="MASTER_PLAYLIST_URL"></stringProp>
+        <com.ramp.jmeter.hls__player.logic.PlayerController guiclass="com.ramp.jmeter.hls_player.gui.PlayerControllerGui" testclass="com.ramp.jmeter.hls_player.logic.PlayerController" testname="HLS Player" enabled="true">
+          <stringProp name="MASTER_PLAYLIST_URL">https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8</stringProp>
           <boolProp name="IS_CUSTOM_DURATION">true</boolProp>
           <stringProp name="CUSTOM_DURATION">5</stringProp>
-          <intProp name="SAMPLER_COUNT">2</intProp>
-          <elementProp name="MEDIA_PLAYLIST_SAMPLER0" elementType="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="HLS Media Playlist Sampler" enabled="true">
+        </com.ramp.jmeter.hls__player.logic.PlayerController>
+        <hashTree>
+          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="HLS Media Playlist Sampler" enabled="true">
             <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Video</stringProp>
-            <stringProp name="HLS.BANDWIDTH_OPTION">MAX</stringProp>
-            <stringProp name="HLS.RESOLUTION_OPTION">CUSTOM</stringProp>
-            <stringProp name="HLS.CUSTOM_RESOLUTION">123x123</stringProp>
-          </elementProp>
-          <elementProp name="MEDIA_PLAYLIST_SAMPLER1" elementType="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="HLS Media Playlist Sampler" enabled="true">
-            <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Audio</stringProp>
-          </elementProp>
-        </com.ramp.jmeter.hls__player.logic.PlayerTestElement>
-        <hashTree/>
+            <stringProp name="HLS.BANDWIDTH_OPTION">MIN</stringProp>
+            <stringProp name="HLS.CUSTOM_BANDWIDTH"></stringProp>
+            <stringProp name="HLS.RESOLUTION_OPTION">MIN</stringProp>
+            <stringProp name="HLS.CUSTOM_RESOLUTION"></stringProp>
+          </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
+          <hashTree/>
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+        </hashTree>
       </hashTree>
     </hashTree>
   </hashTree>
