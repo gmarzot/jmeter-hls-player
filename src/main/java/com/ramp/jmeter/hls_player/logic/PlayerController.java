@@ -53,7 +53,7 @@ public class PlayerController extends GenericController {
     public void initialize() {
         log.debug("initialize");
         parser = new Parser();
-        masterResponse = tryGetMasterList();
+        DataRequest masterResponse = tryGetMasterList();
 
 
         priorityQueue = new PriorityQueue<>(new MediaPlaylistSamplerComparator());
@@ -148,11 +148,6 @@ public class PlayerController extends GenericController {
     public static final String CUSTOM_DURATION = "CUSTOM_DURATION";
 
     private Parser parser;
-    private DataRequest masterResponse;
-
-    DataRequest getMasterResponse(){
-        return masterResponse;
-    }
 
     public DataRequest tryGetMasterList() {
         try {

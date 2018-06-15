@@ -26,17 +26,29 @@
       </ThreadGroup>
       <hashTree>
         <com.ramp.jmeter.hls__player.logic.PlayerController guiclass="com.ramp.jmeter.hls_player.gui.PlayerControllerGui" testclass="com.ramp.jmeter.hls_player.logic.PlayerController" testname="HLS Player" enabled="true">
-          <stringProp name="MASTER_PLAYLIST_URL">https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8</stringProp>
+          <stringProp name="MASTER_PLAYLIST_URL">http://esioslive6-i.akamaihd.net/hls/live/202892/AL_P_ESP1_FR_FRA/playlist.m3u8</stringProp>
           <boolProp name="IS_CUSTOM_DURATION">true</boolProp>
-          <stringProp name="CUSTOM_DURATION">5</stringProp>
+          <stringProp name="CUSTOM_DURATION">20</stringProp>
         </com.ramp.jmeter.hls__player.logic.PlayerController>
         <hashTree>
-          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="HLS Media Playlist Sampler" enabled="true">
+          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Video" enabled="true">
             <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Video</stringProp>
-            <stringProp name="HLS.BANDWIDTH_OPTION">MIN</stringProp>
+            <stringProp name="HLS.BANDWIDTH_OPTION">MAX</stringProp>
             <stringProp name="HLS.CUSTOM_BANDWIDTH"></stringProp>
-            <stringProp name="HLS.RESOLUTION_OPTION">MIN</stringProp>
+            <stringProp name="HLS.RESOLUTION_OPTION">MAX</stringProp>
             <stringProp name="HLS.CUSTOM_RESOLUTION"></stringProp>
+          </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
+          <hashTree/>
+          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Audio" enabled="true">
+            <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Audio</stringProp>
+            <stringProp name="HLS.BANDWIDTH_OPTION">CUSTOM</stringProp>
+            <stringProp name="HLS.CUSTOM_BANDWIDTH"></stringProp>
+            <stringProp name="HLS.RESOLUTION_OPTION">CUSTOM</stringProp>
+            <stringProp name="HLS.CUSTOM_RESOLUTION"></stringProp>
+          </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
+          <hashTree/>
+          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Subtitles" enabled="true">
+            <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Closed Captions</stringProp>
           </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
           <hashTree/>
           <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">

@@ -62,7 +62,7 @@ public class MediaPlaylistSamplerGui extends AbstractSamplerGui {
                 else
                     panel.setCustomAudio(customAudio);
                 break;
-            case MediaPlaylistSampler.TYPE_CLOSED_CAPTIONS:
+            case MediaPlaylistSampler.TYPE_SUBTITLES:
                 String customCC = sampler.getPropertyAsString(MediaPlaylistSampler.CUSTOM_CC, DEFAULT);
                 if (customCC.equals(DEFAULT))
                     panel.setDefaultCC();
@@ -95,7 +95,7 @@ public class MediaPlaylistSamplerGui extends AbstractSamplerGui {
                     sampler.setProperty(MediaPlaylistSampler.CUSTOM_AUDIO, panel.getCustomAudio());
                 }
                 break;
-            case MediaPlaylistSampler.TYPE_CLOSED_CAPTIONS:
+            case MediaPlaylistSampler.TYPE_SUBTITLES:
                 if (!panel.isDefaultCC()) {
                     sampler.setProperty(MediaPlaylistSampler.CUSTOM_CC, panel.getCustomCC());
                 }

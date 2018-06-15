@@ -28,13 +28,13 @@ public class MediaPlaylistSamplerTest {
 		
         parserMock = Mockito.mock(Parser.class);
         sampler = new MediaPlaylistSampler();
-		sampler.setURLData("http://www.mock.com/path");
+//		sampler.setURLData("http://www.mock.com/path");
 		sampler.setResData("640x360");
 		sampler.setNetworkData("1395723");
 		sampler.setBandwidthType(MediaPlaylistSampler.MAX);
 		sampler.setResolutionType(MediaPlaylistSampler.CUSTOM);
-		sampler.setPlaySecondsData("20");
-		sampler.setVideoDuration(true);
+//		sampler.setPlaySecondsData("20");
+//		sampler.setVideoDuration(true);
 		sampler.setParser(parserMock);
 		sampler.setName("Test");
 	}
@@ -129,7 +129,7 @@ public class MediaPlaylistSamplerTest {
 			.thenReturn(respond4)
 			.thenReturn(respond5);
 
-		Mockito.when(parserMock.selectMediaPlaylist(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class)))
+		Mockito.when(parserMock.selectVideoPlaylist(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class)))
 			.thenReturn("/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d");
 		Mockito.when(parserMock.extractSegmentUris(Mockito.any()))
 				.thenReturn(fragments);

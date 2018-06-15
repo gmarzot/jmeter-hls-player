@@ -45,7 +45,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     public static final String CUSTOM_CC = "HLS.CUSTOM_CC";
     public static final String TYPE_VIDEO = "Video";
     public static final String TYPE_AUDIO = "Audio";
-    public static final String TYPE_CLOSED_CAPTIONS = "Closed Captions";
+    public static final String TYPE_SUBTITLES = "Closed Captions";
 
 
     private Parser parser;
@@ -92,16 +92,21 @@ public class MediaPlaylistSampler extends AbstractSampler {
         String basePath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
 
         String playlistUri = null;
-        if (this.getMediaPlaylistType().equals("Video")) {
-            playlistUri = parser.selectVideoPlaylist(respond.getResponse(),
-                    this.getRESDATA(), this.getNetwordData(),
-                    this.getBandwidthType(), this.getResolutionType());
-        } else if (this.getMediaPlaylistType().equals("Audio")) {
-            playlistUri = parser.selectAudioPlaylist(respond.getResponse(), this.getCustomAudio());
-        } else if (this.getMediaPlaylistType().equals("Closed Captions")) {
-            playlistUri = parser.selectSubtitlesPlaylist(respond.getResponse(), this.getCustomCC());
-        } else {
-            log.error("Unexpected Media Playlist Type: " + this.getMediaPlaylistType());
+        switch (this.getMediaPlaylistType()) {
+            case "Video":
+                playlistUri = parser.selectVideoPlaylist(respond.getResponse(),
+                        this.getRESDATA(), this.getNetwordData(),
+                        this.getBandwidthType(), this.getResolutionType());
+                break;
+            case "Audio":
+                playlistUri = parser.selectAudioPlaylist(respond.getResponse(), this.getCustomAudio());
+                break;
+            case "Closed Captions":
+                playlistUri = parser.selectSubtitlesPlaylist(respond.getResponse(), this.getCustomCC());
+                break;
+            default:
+                log.error("Unexpected Media Playlist Type: " + this.getMediaPlaylistType());
+                break;
         }
 
         if (playlistUri == null) {
@@ -195,6 +200,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     playlistResult = new SampleResult();
                     playlistResponse = getPlaylist(playlistResult, parser);
                     segments.addAll(parser.extractSegmentUris(playlistResponse.getResponse()));
+                    log.info("parsed " + segments.size() + " segments out of playlist");
                     lastTimeMillis = now;
 
                     int td = parser.getTargetDuration(playlistResponse.getResponse());
@@ -219,10 +225,11 @@ public class MediaPlaylistSampler extends AbstractSampler {
                         String durationStr = segment.getDuration();
                         float duration = Float.parseFloat(durationStr);
                         log.info("segment duration: " + durationStr + " (" + duration + ")");
-
-                        SampleResult segmentResult = getSegment(parser, segment, playlistUri);
+                        String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
+                        SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
                         segmentsFetched.add(segment.getUri().trim());
-                        nextCallTime += duration * 1000;
+                        nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
+                        log.info("Next Call Time: " + nextCallTime);
                         return segmentResult;
                     }
                 }
@@ -288,7 +295,19 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     + getRequestHeader(this.getHeaderManager()));
             result.setSuccessful(respond.isSuccess());
             result.setResponseMessage(respond.getResponseMessage());
-            result.setSampleLabel("video_segment");
+            switch (this.getMediaPlaylistType()) {
+                case TYPE_VIDEO:
+                    result.setSampleLabel("video_segment");
+                    break;
+                case TYPE_AUDIO:
+                    result.setSampleLabel("audio_segment");
+                    break;
+                case TYPE_SUBTITLES:
+                    result.setSampleLabel("subtitle_segment");
+                    break;
+                default:
+                    log.error("Unknown media type");
+            }
             result.setResponseHeaders("URL: " + uriString + "\n" + respond.getHeadersAsString());
             result.setResponseCode(respond.getResponseCode());
             result.setContentType(respond.getContentType());
