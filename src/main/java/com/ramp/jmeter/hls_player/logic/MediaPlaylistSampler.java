@@ -90,7 +90,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     private String getPlaylistUri(DataRequest respond, Parser parser) throws MalformedURLException {
         URL masterURL = new URL(respond.url);
         String basePath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
-
+        log.info("extracting "+this.getMediaPlaylistType()+" playlist uri from master playlist("+respond.url+")");
         String playlistUri = null;
         switch (this.getMediaPlaylistType()) {
             case "Video":
@@ -110,7 +110,11 @@ public class MediaPlaylistSampler extends AbstractSampler {
         }
 
         if (playlistUri == null) {
-            log.warn("Unable to select playlist, assuming media playlist supplied.");
+            log.warn("Unable to select playlist, testing if media playlist supplied.");
+            if(!respond.getResponse().contains("#EXTINF")){
+                log.error("The playlist is neither master or media");
+                return null;
+            }
             playlistUri = respond.url; // the supplied url is the media playlist possibly
         }
 
@@ -174,12 +178,14 @@ public class MediaPlaylistSampler extends AbstractSampler {
         try {
             if (masterResponse == null) {
                 log.error("Master Playlist Missing");
+                nextCallTime = -1;
                 return null;
             }
             if (playlistUri == null) {
                 playlistUri = getPlaylistUri(masterResponse, parser);
                 if (playlistUri == null) {
                     log.error("Unable to get playlist path");
+                    nextCallTime = -1;
                     return null;
                 }
             }
@@ -238,6 +244,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
             e1.printStackTrace();
         }
         log.warn("Sampler returning null!");
+        nextCallTime = -1;
         return null;
     }
 

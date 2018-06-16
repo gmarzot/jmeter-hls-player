@@ -18,17 +18,17 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">15</stringProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
         <com.ramp.jmeter.hls__player.logic.PlayerController guiclass="com.ramp.jmeter.hls_player.gui.PlayerControllerGui" testclass="com.ramp.jmeter.hls_player.logic.PlayerController" testname="HLS Player" enabled="true">
-          <stringProp name="MASTER_PLAYLIST_URL">http://esioslive6-i.akamaihd.net/hls/live/202892/AL_P_ESP1_FR_FRA/playlist.m3u8</stringProp>
+          <stringProp name="MASTER_PLAYLIST_URL">http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8</stringProp>
           <boolProp name="IS_CUSTOM_DURATION">true</boolProp>
-          <stringProp name="CUSTOM_DURATION">20</stringProp>
+          <stringProp name="CUSTOM_DURATION">60</stringProp>
         </com.ramp.jmeter.hls__player.logic.PlayerController>
         <hashTree>
           <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Video" enabled="true">
@@ -39,7 +39,7 @@
             <stringProp name="HLS.CUSTOM_RESOLUTION"></stringProp>
           </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
           <hashTree/>
-          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Audio" enabled="true">
+          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Audio" enabled="false">
             <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Audio</stringProp>
             <stringProp name="HLS.BANDWIDTH_OPTION">CUSTOM</stringProp>
             <stringProp name="HLS.CUSTOM_BANDWIDTH"></stringProp>
@@ -47,7 +47,7 @@
             <stringProp name="HLS.CUSTOM_RESOLUTION"></stringProp>
           </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
           <hashTree/>
-          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Subtitles" enabled="true">
+          <com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler guiclass="com.ramp.jmeter.hls_player.gui.MediaPlaylistSamplerGui" testclass="com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler" testname="Subtitles" enabled="false">
             <stringProp name="HLS.MEDIA_PLAYLIST_TYPE">Closed Captions</stringProp>
           </com.ramp.jmeter.hls__player.logic.MediaPlaylistSampler>
           <hashTree/>
@@ -88,6 +88,42 @@
           </ResultCollector>
           <hashTree/>
           <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <ResultCollector guiclass="RespTimeGraphVisualizer" testclass="ResultCollector" testname="Response Time Graph" enabled="true">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>

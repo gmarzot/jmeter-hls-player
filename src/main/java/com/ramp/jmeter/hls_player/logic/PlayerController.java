@@ -123,7 +123,7 @@ public class PlayerController extends GenericController {
                 return null;
             }
         }
-        if (lastSampler != null) {
+        if (lastSampler != null && lastSampler.getNextCallTimeMillis() != -1) {
             priorityQueue.add(lastSampler);
         }
         Sampler returnValue = super.next();
@@ -137,7 +137,7 @@ public class PlayerController extends GenericController {
         return super.nextIsNull();
     }
 
-    //Master Playlist Getting
+    //---------------------------Master Playlist Getting-----------------------------------//
 
     public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
     public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$

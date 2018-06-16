@@ -167,8 +167,8 @@ public class Parser implements Serializable {
 
     public String selectVideoPlaylist(String playlistData, String customResolution, String customBandwidth, String bwSelected, String resSelected) {
         String streamPattern = "(EXT-X-STREAM-INF.*)\\n(.*\\.m3u8.*)";
-        String bandwidthPattern = "[:|,]BANDWIDTH=(\\d+)";
-        String resolutionPattern = "[:|,]RESOLUTION=(\\d+x\\d+)";
+        String bandwidthPattern = "[:|,]\\W*BANDWIDTH=(\\d+)";
+        String resolutionPattern = "[:|,]\\W*RESOLUTION=(\\d+x\\d+)";
 
         return getVideoUri(streamPattern, bandwidthPattern, resolutionPattern, playlistData, customResolution, customBandwidth, bwSelected, resSelected);
     }
