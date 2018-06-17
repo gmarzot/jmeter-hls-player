@@ -10,53 +10,42 @@ To play, the client first downloads the Master Playlist, and then the Media Play
 ### Concept
 This plugin solves the HLS complexity internally. It gets the master playlist file, chooses one variant and gets its media playlist file, the segments, etc. The plugin simulates users consuming media over HLS supporting different situations: stream type, playback time, network bandwidth and device resolution.
 
-Here is what the HLS Sampler looks like:
-
-![](HLSPluginView.png)
 ### To create your test
 - Install the HLS plugin from the Plugins Manager
 - Create a Thread Group.
-- Add the HLS Sampler Add -> Sampler -> HLS Sampler
-
-![](HLSAddSampler.png)
+- Add the HLS Player Add -> Logic Controller -> HLS Player
+- Add the Media Playlist Sampler Add -> Sampler -> Media Playlist Sampler
 
 After that you can add assertions, listeners, etc.
-### HLS Sampler Properties
-The following properties can be set in the HLS Sampler. They should be tuned to simulate the real scenario you want to test.
+
+### HLS Player Properties
+The following properties can be set in the HLS Player.
 #### Video options
 Set the link to the master playlist file
 - URL
 
-Set the video type corresponding to the playlist
-- VOD
-- Live Stream
-- Event Stream
-
-![](HLSVideo.png)
 #### Play options
 Set the playback time of the test:
 - Whole video
 - Video duration (seconds)
 
-![](HLSTime.png)
-#### Network options
-Select the protocol of the playlist you want to test. You can identify it in the link to the master playlist file:
-- http
-- https
+### Media Playlsit Sampler Properties
+The following properties can be set in the Media Playlist Sampler. They should be tuned to simulate the real scenario you want to test.
+
 #### Bandwidth
 Select the bandwidth you want to simulate in your test. If there is only one playlist for the selected bandwidth, the plugin will select the playlist based only on this criterion.
 - Custom Bandwidth (bits/s)
 - Min bandwidth available
 - Max bandwidth available
 
-![](HLSNetwork.png)
 #### Resolution
-After selecting the desired bandwidth you can select a resolution to simulate your specific device.
+After selecting the desired bandwidth you can select a resolution to simulate your specific device. For Custom Resolution provide the width by the height in pixels, for example "1920x1080"
+- Custom Resolution (Width x Height)
+- Min Resolution
+- Max Resolution
 
-![](HLSResolution.png)
 ## Results
 You can set listeners to evaluate the results of your tests. The View Results Tree Listener displays the HLS Hierarchy, so you can inspect how the requests and responses worked.
 
-![](HLSResults.png)
 
-Assertions are supported for the master playlist and variant (child) playlist. Examples: Response Assertion and Duration Assertion. Select ìMain sample onlyî in assertion to test the master playlist response and ìSub-samples onlyî to test the variant (child) playlist response.
+Assertions are supported for the master playlist and variant (child) playlist. Examples: Response Assertion and Duration Assertion. Select ‚ÄúMain sample only‚Äù in assertion to test the master playlist response and ‚ÄúSub-samples only‚Äù to test the variant (child) playlist response.
