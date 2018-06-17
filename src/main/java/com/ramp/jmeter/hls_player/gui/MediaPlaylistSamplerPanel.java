@@ -1,22 +1,12 @@
 package com.ramp.jmeter.hls_player.gui;
 
-import javax.swing.JPanel;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
-import javax.swing.JRadioButton;
-import javax.swing.JLabel;
-import javax.swing.GroupLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.BorderFactory;
-import javax.swing.LayoutStyle;
+import com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler;
+
+import javax.swing.*;
 
 import java.awt.event.ItemEvent;
 
-public class HlsSamplerPanel extends JPanel {
-
-    private JPanel MasterPlaylistPanel = new JPanel();
-    private JPanel MediaPlaylistTypePanel = new JPanel();
-
+public class MediaPlaylistSamplerPanel extends JPanel {
 
     private JPanel videoStreamSelectionPanel = new JPanel();
     private JPanel resolutionOptions = new JPanel();
@@ -28,19 +18,12 @@ public class HlsSamplerPanel extends JPanel {
 
     private JPanel closedCaptionTrackSelectionPanel = new JPanel();
 
-    private JLabel urlFieldLabel = new JLabel("URL  ");
-
-    private JTextField urlField = new JTextField();
     private JTextField resolutionField = new JTextField();
-    private JTextField playSecondsField = new JTextField();
     private JTextField bandwidthField = new JTextField();
     private JTextField audioField = new JTextField();
     private JTextField CCField = new JTextField();
 
     private JComboBox mediaPlaylistTypeCBox = new JComboBox<>(new String[]{"Video", "Audio", "Closed Captions"});
-
-    private JRadioButton rPlayVideoBtn = new JRadioButton("Whole Video");
-    private JRadioButton rPlayPartBtn = new JRadioButton("Fixed Duration (sec):");
 
     private JRadioButton rMinimumResolution = new JRadioButton("Min");
     private JRadioButton rMaximumResolution = new JRadioButton("Max");
@@ -56,23 +39,18 @@ public class HlsSamplerPanel extends JPanel {
     private JRadioButton rDefaultCC = new JRadioButton("Default");
     private JRadioButton rCustomCC = new JRadioButton("Custom: ");
     
-    private ButtonGroup durationGroup = new ButtonGroup();
     private ButtonGroup resolGroup = new ButtonGroup();
     private ButtonGroup bandGroup = new ButtonGroup();
     private ButtonGroup audioGroup = new ButtonGroup();
     private ButtonGroup CCGroup = new ButtonGroup();
 
-    public HlsSamplerPanel() {
+
+    public MediaPlaylistSamplerPanel() {
         initComponents();
+        setupLayouts();
     }
 
     private void initComponents() {
-
-        urlFieldLabel.setLabelFor(urlField);
-
-        durationGroup.add(rPlayVideoBtn);
-        durationGroup.add(rPlayPartBtn);
-        rPlayPartBtn.setSelected(true);
 
         resolGroup.add(rCustomResolution);
         resolGroup.add(rMaximumResolution);
@@ -92,15 +70,6 @@ public class HlsSamplerPanel extends JPanel {
         CCGroup.add(rDefaultCC);
         rDefaultCC.setSelected(true);
 
-        playSecondsField.setEnabled(true);
-        rPlayPartBtn.addItemListener(e -> {
-                    if (e.getStateChange() == ItemEvent.SELECTED) {
-                        playSecondsField.setEnabled(true);
-                    } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                        playSecondsField.setEnabled(false);
-                    }
-                }
-        );
         bandwidthField.setEnabled(false);
         rCustomBandwidth.addItemListener(e -> {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -138,61 +107,24 @@ public class HlsSamplerPanel extends JPanel {
                 }
         );
         mediaPlaylistTypeCBox.addItemListener(e -> {
-                    String mediaType = (String)e.getItem();
-                    MediaPlaylistTypePanel.removeAll();
-                    if(mediaType.equals("Video")){
+                    String mediaType = (String) e.getItem();
+                    this.removeAll();
+                    if (mediaType.equals("Video")) {
                         mediaPlaylistPanel = videoStreamSelectionPanel;
-                    } else if(mediaType.equals("Audio")){
+                    } else if (mediaType.equals("Audio")) {
                         mediaPlaylistPanel = audioTrackSelectionPanel;
-                    } else if(mediaType.equals("Closed Captions")){
+                    } else if (mediaType.equals("Closed Captions")) {
                         mediaPlaylistPanel = closedCaptionTrackSelectionPanel;
                     } else {
-                      //not good
+                        //not good
                     }
-                    GroupLayout MediaPlaylistTypePanelLayout = new javax.swing.GroupLayout(MediaPlaylistTypePanel);
-                    MediaPlaylistTypePanelLayout.setAutoCreateGaps(true);
-                    MediaPlaylistTypePanelLayout.setAutoCreateContainerGaps(true);
-                    MediaPlaylistTypePanel.setLayout(MediaPlaylistTypePanelLayout);
-                    MediaPlaylistTypePanelLayout.setHorizontalGroup(
-                            MediaPlaylistTypePanelLayout.createSequentialGroup()
-                                    .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                            javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(mediaPlaylistPanel)
-                    );
-                    MediaPlaylistTypePanelLayout.setVerticalGroup(
-                            MediaPlaylistTypePanelLayout.createParallelGroup()
-                                    .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                            javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(mediaPlaylistPanel)
-                    );
+                    setupLayouts();
                     repaint();
                     revalidate();
                 }
         );
-
-        MasterPlaylistPanel.setBorder(BorderFactory.createTitledBorder("Master Play List"));
-        GroupLayout MasterPlaylistPanelLayout = new javax.swing.GroupLayout(MasterPlaylistPanel);
-        MasterPlaylistPanelLayout.setAutoCreateContainerGaps(true);
-        MasterPlaylistPanel.setLayout(MasterPlaylistPanelLayout);
-        MasterPlaylistPanelLayout.setHorizontalGroup(
-                MasterPlaylistPanelLayout.createSequentialGroup()
-                        .addComponent(urlFieldLabel)
-                        .addComponent(urlField)
-                        .addComponent(rPlayVideoBtn)
-                        .addComponent(rPlayPartBtn)
-                        .addComponent(playSecondsField)
-        );
-        MasterPlaylistPanelLayout.setVerticalGroup(
-                MasterPlaylistPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(urlFieldLabel)
-                        .addComponent(urlField, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(rPlayVideoBtn)
-                        .addComponent(rPlayPartBtn)
-                        .addComponent(playSecondsField, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-
+    }
+    void setupLayouts(){
         bandwidthOptions.setBorder(BorderFactory.createTitledBorder("Bandwidth Options"));
         GroupLayout bandwidthOptionsLayout = new javax.swing.GroupLayout(bandwidthOptions);
         bandwidthOptionsLayout.setAutoCreateContainerGaps(true);
@@ -310,91 +242,61 @@ public class HlsSamplerPanel extends JPanel {
                 );
 
 
-        MediaPlaylistTypePanel.setBorder(BorderFactory.createTitledBorder("Media Playlist"));
-        GroupLayout MediaPlaylistTypePanelLayout = new javax.swing.GroupLayout(MediaPlaylistTypePanel);
-        MediaPlaylistTypePanelLayout.setAutoCreateGaps(true);
-        MediaPlaylistTypePanelLayout.setAutoCreateContainerGaps(true);
-        MediaPlaylistTypePanel.setLayout(MediaPlaylistTypePanelLayout);
-        MediaPlaylistTypePanelLayout.setHorizontalGroup(
-                MediaPlaylistTypePanelLayout.createSequentialGroup()
-                        .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(mediaPlaylistPanel)
-        );
-        MediaPlaylistTypePanelLayout.setVerticalGroup(
-                MediaPlaylistTypePanelLayout.createParallelGroup()
-                        .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(mediaPlaylistPanel)
-        );
-
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setBorder(BorderFactory.createTitledBorder("Media Playlist"));
+        GroupLayout layout = new javax.swing.GroupLayout(this);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(MasterPlaylistPanel)
-                        .addComponent(MediaPlaylistTypePanel)
+                layout.createParallelGroup()
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        )
+                        .addComponent(mediaPlaylistPanel)
         );
         layout.setVerticalGroup(
                 layout.createSequentialGroup()
-                        .addComponent(MasterPlaylistPanel)
-                        .addComponent(MediaPlaylistTypePanel)
+                        .addGroup(layout.createParallelGroup()
+                                .addComponent(mediaPlaylistTypeCBox, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        )
+                        .addComponent(mediaPlaylistPanel)
         );
-
     }
 
-    public void setUrlData(String urlData) {
-        urlField.setText(urlData);
+
+
+    String getMediaPlaylistType(){
+        return (String)mediaPlaylistTypeCBox.getSelectedItem();
     }
 
-    public String getUrlData() {
-        return urlField.getText();
+    void setMediaPlaylistType(String type){
+        mediaPlaylistTypeCBox.setSelectedItem(type);
     }
 
-    public void setResData(String resData) {
+    //old functions
+    public void setCustomResolution(String resData) {
         resolutionField.setText(resData);
     }
 
-    public String getResData() {
+    public String getCustomResolution() {
         return resolutionField.getText();
     }
 
-    public void setNetData(String netData) {
+    public void setCustomBandwidth(String netData) {
         bandwidthField.setText(netData);
     }
 
-    public String getNetData() {
+    public String getCustomBandwidth() {
         return bandwidthField.getText();
     }
 
-    public void setPlaySecondsData(String seconds) {
-        playSecondsField.setText(seconds);
-    }
-
-    public String getPlaySecondsData() {
-        return playSecondsField.getText();
-    }
-
-    public void setVideoDuration(boolean check) {
-        rPlayPartBtn.setSelected(check);
-    }
-
-    public boolean getVideoDuration() {
-        return rPlayPartBtn.isSelected();
-    }
-
-    public void setVideoType(String check) {
-
-        //doesn't do anything anymore. Video type determined by playlist
-    }
 
     public void setResolutionType(String check) {
-        if (check.equalsIgnoreCase("minResolution"))
+        if (check.equals(MediaPlaylistSampler.MIN))
             rMinimumResolution.setSelected(true);
-        else if (check.equalsIgnoreCase("maxResolution"))
+        else if (check.equals(MediaPlaylistSampler.MAX))
             rMaximumResolution.setSelected(true);
         else
             rCustomResolution.setSelected(true);
@@ -402,51 +304,65 @@ public class HlsSamplerPanel extends JPanel {
     }
 
     public void setBandwidthType(String check) {
-        if (check.equalsIgnoreCase("minBandwidth"))
+        if (check.equals(MediaPlaylistSampler.MIN))
             rMinimumBandwidth.setSelected(true);
-        else if (check.equalsIgnoreCase("maxBandwidth"))
+        else if (check.equals(MediaPlaylistSampler.MAX))
             rMaximumBandwidth.setSelected(true);
         else
             rCustomBandwidth.setSelected(true);
 
     }
 
-    public String isChecked() {
-        if (rPlayVideoBtn.isSelected()) {
-
-            return "-1";
-
-        } else {
-
-            return getPlaySecondsData();
-        }
-    }
-
     public String getResolutionType() {
         if (rCustomResolution.isSelected()) {
-            return "customResolution";
+            return MediaPlaylistSampler.CUSTOM;
         } else if (rMinimumResolution.isSelected()) {
-            return "minResolution";
+            return MediaPlaylistSampler.MIN;
         } else
-            return "maxResolution";
+            return MediaPlaylistSampler.MAX;
     }
 
     public String getBandwidthType() {
         if (rCustomBandwidth.isSelected()) {
-            return "customBandwidth";
+            return MediaPlaylistSampler.CUSTOM;
         } else if (rMinimumBandwidth.isSelected()) {
-            return "minBandwidth";
+            return MediaPlaylistSampler.MIN;
         } else
-            return "maxBandwidth";
+            return MediaPlaylistSampler.MAX;
     }
 
-    public String videoType() {
-        //This method is not supported. video type is determined by the playlist
-        return "vod";
+
+    public boolean isDefaultAudio() {
+        return rDefaultAudio.isSelected();
     }
 
-    public boolean rDurationVideoButtoncheck() {
-        return rPlayVideoBtn.isSelected();
+    public String getCustomAudio(){
+        return audioField.getText();
     }
 
+    public boolean isDefaultCC() {
+        return rDefaultCC.isSelected();
+    }
+
+    public String getCustomCC(){
+        return CCField.getText();
+    }
+
+    public void setDefaultAudio() {
+        rDefaultAudio.setSelected(true);
+    }
+
+    public void setCustomAudio(String customAudio) {
+        rCustomAudio.setSelected(true);
+        audioField.setText(customAudio);
+    }
+
+    public void setDefaultCC() {
+        rDefaultCC.setSelected(true);
+    }
+
+    public void setCustomCC(String customCC) {
+        rCustomCC.setSelected(true);
+        CCField.setText(customCC);
+    }
 }

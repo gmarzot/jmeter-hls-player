@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
@@ -26,219 +27,248 @@ public class Parser implements Serializable {
     // HTTP GET request
     public DataRequest getBaseUrl(URL url, SampleResult sampleResult, boolean setRequest) throws IOException {
 
-	HttpURLConnection con = null;
-	DataRequest result = new DataRequest();
-	boolean first = true;
-	long sentBytes = 0;
+        HttpURLConnection con = null;
+        DataRequest result = new DataRequest();
+        boolean first = true;
+        long sentBytes = 0;
 
-	con = (HttpURLConnection) url.openConnection();
+        con = (HttpURLConnection) url.openConnection();
 
-	sampleResult.connectEnd();
+        sampleResult.connectEnd();
 
-	// By default it is GET request
-	con.setRequestMethod("GET");
+        result.url = url.toString();
 
-	// add request header
-	con.setRequestProperty("User-Agent", USER_AGENT);
+        // By default it is GET request
+        con.setRequestMethod("GET");
 
-	// Set request header
-	result.setRequestHeaders(con.getRequestMethod() + "  " + url.toString() + "\n");
+        // add request header
+        con.setRequestProperty("User-Agent", USER_AGENT);
 
-	int responseCode = con.getResponseCode();
+        // Set request header
+        result.setRequestHeaders(con.getRequestMethod() + "  " + url.toString() + "\n");
 
-	// Reading response from input Stream
-	BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        int responseCode = con.getResponseCode();
 
-	String inputLine;
-	StringBuffer response = new StringBuffer();
+        // Reading response from input Stream
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 
-	while ((inputLine = in.readLine()) != null) {
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-	    if (setRequest)
-		response.append(inputLine + "\n");
+        while ((inputLine = in.readLine()) != null) {
 
-	    sentBytes += inputLine.getBytes().length + 1;
+            if (setRequest)
+                response.append(inputLine + "\n");
 
-	    if (first) {
-		sampleResult.latencyEnd();
-		first = false;
-	    }
-	}
+            sentBytes += inputLine.getBytes().length + 1;
 
-	in.close();
+            if (first) {
+                sampleResult.latencyEnd();
+                first = false;
+            }
+        }
 
-	// Set response parameters
-	result.setHeaders(con.getHeaderFields());
-	result.setResponse(response.toString());
-	result.setResponseCode(String.valueOf(responseCode));
-	result.setResponseMessage(con.getResponseMessage());
-	result.setContentType(con.getContentType());
-	result.setSuccess(isSuccessCode(responseCode));
-	result.setSentBytes(sentBytes);
-	result.setContentEncoding(getEncoding(con));
+        in.close();
 
-	return result;
+        // Set response parameters
+        result.setHeaders(con.getHeaderFields());
+        result.setResponse(response.toString());
+        result.setResponseCode(String.valueOf(responseCode));
+        result.setResponseMessage(con.getResponseMessage());
+        result.setContentType(con.getContentType());
+        result.setSuccess(isSuccessCode(responseCode));
+        result.setSentBytes(sentBytes);
+        result.setContentEncoding(getEncoding(con));
+
+        return result;
 
     }
 
     public String getEncoding(HttpURLConnection connection) {
-	String contentType = connection.getContentType();
-	String[] values = contentType.split(";"); // values.length should be 2
-	String charset = "";
+        String contentType = connection.getContentType();
+        String[] values = contentType.split(";"); // values.length should be 2
+        String charset = "";
 
-	for (String value : values) {
-	    value = value.trim();
+        for (String value : values) {
+            value = value.trim();
 
-	    if (value.toLowerCase().startsWith("charset=")) {
-		charset = value.substring("charset=".length());
-	    }
-	}
+            if (value.toLowerCase().startsWith("charset=")) {
+                charset = value.substring("charset=".length());
+            }
+        }
 
-	return charset;
+        return charset;
     }
 
 
     public List<DataSegment> extractSegmentUris(String playlistUrl) {
-	String pattern = "EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
-	final List<DataSegment> mediaList = new ArrayList<>();
-	Pattern r = Pattern.compile(pattern);
-	Matcher m = r.matcher(playlistUrl);
-	log.info("playlist: " + playlistUrl);
+        String pattern = "EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
+        final List<DataSegment> mediaList = new ArrayList<>();
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(playlistUrl);
+        log.info("playlist: " + playlistUrl);
 
-	while (m.find()) {
-	    DataSegment data = new DataSegment(m.group(1), m.group(3));
-	    log.info("duration: " + m.group(1) + " fragment: " + m.group(3));
-	    mediaList.add(data);
-	}
-	return mediaList;
+        while (m.find()) {
+            DataSegment data = new DataSegment(m.group(1), m.group(3));
+            log.info("duration: " + m.group(1) + " fragment: " + m.group(3));
+            mediaList.add(data);
+        }
+        return mediaList;
     }
 
     private int resolutionCompare(String r1, String r2) {
-	String[] r1Dimensions = r1.split("x");
-	String[] r2Dimensions = r2.split("x");
-	int a1 = Integer.parseInt(r1Dimensions[0]) * Integer.parseInt(r1Dimensions[1]);
-	int a2 = Integer.parseInt(r2Dimensions[0]) * Integer.parseInt(r2Dimensions[1]);
-	return Integer.compare(a1,a2);
+        String[] r1Dimensions = r1.split("x");
+        String[] r2Dimensions = r2.split("x");
+        int a1 = Integer.parseInt(r1Dimensions[0]) * Integer.parseInt(r1Dimensions[1]);
+        int a2 = Integer.parseInt(r2Dimensions[0]) * Integer.parseInt(r2Dimensions[1]);
+        return Integer.compare(a1, a2);
     }
 
-    private boolean resolutionOK(String streamResolution, String currentResolution, String matchMode, String customResolution){
-	log.info("resolutionOK: " + streamResolution + ", " + currentResolution + ", " + matchMode + ", " + currentResolution);
+    private boolean resolutionOK(String streamResolution, String currentResolution, String matchMode, String customResolution) {
+        log.info("resolutionOK: " + streamResolution + ", " + currentResolution + ", " + matchMode + ", " + currentResolution);
 
-	if(matchMode.equalsIgnoreCase("customResolution")){
-	    if (customResolution != null) {
-		return customResolution.equals(streamResolution);
-	    }
-	    log.error("selection mode is customResolution, but no custom resolution set");
-	    return false;
-	} else if(matchMode.equalsIgnoreCase("minResolution")){
-	    if (currentResolution == null) {
-		return true;
-	    } else {
-		if (streamResolution == null) return false;
-		return (resolutionCompare(streamResolution,currentResolution) <= 0);
-	    }
-	} else if(matchMode.equalsIgnoreCase("maxResolution")){
-	    if (currentResolution == null) {
-		return true;
-	    } else {
-		if (streamResolution == null) return false;
-		return (resolutionCompare(streamResolution,currentResolution) >= 0);
-	    }
+        if (matchMode.equalsIgnoreCase(MediaPlaylistSampler.CUSTOM)) {
+            if (customResolution != null) {
+                return customResolution.equals(streamResolution);
+            }
+            log.error("selection mode is customResolution, but no custom resolution set");
+            return false;
+        } else if (matchMode.equalsIgnoreCase(MediaPlaylistSampler.MIN)) {
+            if (currentResolution == null) {
+                return true;
+            } else {
+                if (streamResolution == null) return false;
+                return (resolutionCompare(streamResolution, currentResolution) <= 0);
+            }
+        } else if (matchMode.equalsIgnoreCase(MediaPlaylistSampler.MAX)) {
+            if (currentResolution == null) {
+                return true;
+            } else {
+                if (streamResolution == null) return false;
+                return (resolutionCompare(streamResolution, currentResolution) >= 0);
+            }
 
-	}
-	log.error("unknown resolution selection mode");
-	return false;
-    }
-    
-    public String selectMediaPlaylist(String playlistData, String customResolution, String customBandwidth, String bwSelected, String resSelected) {
-	String streamPattern = "(EXT-X-STREAM-INF.*)\\n(.*\\.m3u8.*)";
-	String bandwidthPattern = "[:|,]BANDWIDTH=(\\d+)";
-	String resolutionPattern = "[:|,]RESOLUTION=(\\d+x\\d+)";
-
-	return getMediaUri(streamPattern, bandwidthPattern, resolutionPattern, playlistData, customResolution, customBandwidth, bwSelected, resSelected);
+        }
+        log.error("unknown resolution selection mode");
+        return false;
     }
 
+    public String selectAudioPlaylist(String playlistData, String customSelector) {
+        String audioPattern = "#EXT-X-MEDIA:TYPE=AUDIO(.*)URI=\"(.*\\.m3u8.*)\"";
 
-    public String getMediaUri(String streamPattern, String bandwidthPattern, String resolutionPattern, String playlistData,
-			      String customResolution, String customBandwidth, String bwSelected, String resSelected) {
-	String bandwidthMax ="100000000";
-	String resolutionMin = "100x100";
-	String resolutionMax = "5000x5000";
-	String curBandwidth = null;
-	String curResolution = null;
-	String uri = null;
-		
-	Pattern s = Pattern.compile(streamPattern);
-	Matcher m = s.matcher(playlistData);
+        return getMediaUri(audioPattern, playlistData, customSelector);
+    }
 
-	Pattern b = Pattern.compile(bandwidthPattern);
-	Pattern r = Pattern.compile(resolutionPattern);
-		
-	while (m.find()) {
-	    Matcher mr = r.matcher(m.group(1));
-	    boolean rfound = mr.find();
-	    Matcher mb = b.matcher(m.group(1));
-	    boolean bfound = mb.find();
+    public String selectSubtitlesPlaylist(String playlistData, String customSelector) {
+        String subtitlesPattern = "#EXT-X-MEDIA:TYPE=SUBTITLES(.*)URI=\"(.*\\.m3u8.*)\"";
 
-	    if (! bfound) {
-		continue;
-	    }
+        return getMediaUri(subtitlesPattern, playlistData, customSelector);
+    }
 
-	    if (bwSelected.equalsIgnoreCase("customBandwidth")) {
-		if (Integer.parseInt(mb.group(1)) == Integer.parseInt(customBandwidth)) {
-		    if (resolutionOK((rfound?mr.group(1):null), curResolution, resSelected, customResolution)) {
-			curResolution = (rfound?mr.group(1):null);
-			uri = m.group(2);
-		    }
-		}
-	    } else if (bwSelected.equalsIgnoreCase("minBandwidth")) {
-		if (curBandwidth == null || (Integer.parseInt(mb.group(1)) <= Integer.parseInt(curBandwidth))) {
-		    curBandwidth = mb.group(1);
-		    if (resolutionOK((rfound?mr.group(1):null), curResolution, resSelected, customResolution)) {
-			curResolution =(rfound?mr.group(1):null);
-			uri = m.group(2);
-		    }
-		}
+    public String selectVideoPlaylist(String playlistData, String customResolution, String customBandwidth, String bwSelected, String resSelected) {
+        String streamPattern = "(EXT-X-STREAM-INF.*)\\n(.*\\.m3u8.*)";
+        String bandwidthPattern = "[:|,]\\W*BANDWIDTH=(\\d+)";
+        String resolutionPattern = "[:|,]\\W*RESOLUTION=(\\d+x\\d+)";
 
-	    } else if (bwSelected.equalsIgnoreCase("maxBandwidth")) {
-		if (curBandwidth == null || (Integer.parseInt(mb.group(1)) >= Integer.parseInt(curBandwidth))) {
-		    curBandwidth = mb.group(1);
-		    if (resolutionOK((rfound?mr.group(1):null), curResolution, resSelected, customResolution)) {
-			curResolution = (rfound?mr.group(1):null);
-			uri = m.group(2);
-		    }
-		}
+        return getVideoUri(streamPattern, bandwidthPattern, resolutionPattern, playlistData, customResolution, customBandwidth, bwSelected, resSelected);
+    }
 
-	    } else {
-		log.error("unknown bandwidth selection mode");
-	    }
+    private String getMediaUri(String mediaPattern, String playlistData, String customSelector) {
+        Pattern pattern = Pattern.compile(mediaPattern);
+        Matcher matcher = pattern.matcher(playlistData);
 
-	}
-	return uri;
+        if (customSelector == null || customSelector.length() == 0) {
+            customSelector = "DEFAULT=YES";
+        }
+
+        while (matcher.find()) {
+            if (matcher.group(1).contains(customSelector)) {
+                return matcher.group(2);
+            }
+        }
+        return null;
+    }
+
+    public String getVideoUri(String streamPattern, String bandwidthPattern, String resolutionPattern, String playlistData,
+                              String customResolution, String customBandwidth, String bwSelected, String resSelected) {
+        String bandwidthMax = "100000000";
+        String resolutionMin = "100x100";
+        String resolutionMax = "5000x5000";
+        String curBandwidth = null;
+        String curResolution = null;
+        String uri = null;
+
+        Pattern s = Pattern.compile(streamPattern);
+        Matcher m = s.matcher(playlistData);
+
+        Pattern b = Pattern.compile(bandwidthPattern);
+        Pattern r = Pattern.compile(resolutionPattern);
+
+        while (m.find()) {
+            Matcher mr = r.matcher(m.group(1));
+            boolean rfound = mr.find();
+            Matcher mb = b.matcher(m.group(1));
+            boolean bfound = mb.find();
+
+            if (!bfound) {
+                continue;
+            }
+
+            if (bwSelected.equalsIgnoreCase(MediaPlaylistSampler.CUSTOM)) {
+                if (Integer.parseInt(mb.group(1)) == Integer.parseInt(customBandwidth)) {
+                    if (resolutionOK((rfound ? mr.group(1) : null), curResolution, resSelected, customResolution)) {
+                        curResolution = (rfound ? mr.group(1) : null);
+                        uri = m.group(2);
+                    }
+                }
+            } else if (bwSelected.equalsIgnoreCase(MediaPlaylistSampler.MIN)) {
+                if (curBandwidth == null || (Integer.parseInt(mb.group(1)) <= Integer.parseInt(curBandwidth))) {
+                    curBandwidth = mb.group(1);
+                    if (resolutionOK((rfound ? mr.group(1) : null), curResolution, resSelected, customResolution)) {
+                        curResolution = (rfound ? mr.group(1) : null);
+                        uri = m.group(2);
+                    }
+                }
+
+            } else if (bwSelected.equalsIgnoreCase(MediaPlaylistSampler.MAX)) {
+                if (curBandwidth == null || (Integer.parseInt(mb.group(1)) >= Integer.parseInt(curBandwidth))) {
+                    curBandwidth = mb.group(1);
+                    if (resolutionOK((rfound ? mr.group(1) : null), curResolution, resSelected, customResolution)) {
+                        curResolution = (rfound ? mr.group(1) : null);
+                        uri = m.group(2);
+                    }
+                }
+
+            } else {
+                log.error("unknown bandwidth selection mode");
+            }
+
+        }
+        return uri;
 
     }
 
     public boolean isLive(String playlistData) {
-    	String pattern1 = "EXT-X-ENDLIST";
-    	Pattern r1 = Pattern.compile(pattern1);
-    	Matcher m1 = r1.matcher(playlistData);
+        String pattern1 = "EXT-X-ENDLIST";
+        Pattern r1 = Pattern.compile(pattern1);
+        Matcher m1 = r1.matcher(playlistData);
 
-    	return !m1.find();
+        return !m1.find();
     }
-    
+
     public int getTargetDuration(String playlistData) {
-    	String pattern1 = "EXT-X-TARGETDURATION:(\\d+)";
-    	Pattern r1 = Pattern.compile(pattern1);
-    	Matcher m1 = r1.matcher(playlistData);
-    	if (m1.find()) {
-    		String dur = m1.group(1); 
-    		return Integer.parseInt(dur);
-    	}
-    	return -1;
+        String pattern1 = "EXT-X-TARGETDURATION:(\\d+)";
+        Pattern r1 = Pattern.compile(pattern1);
+        Matcher m1 = r1.matcher(playlistData);
+        if (m1.find()) {
+            String dur = m1.group(1);
+            return Integer.parseInt(dur);
+        }
+        return -1;
     }
 
     protected boolean isSuccessCode(int code) {
-	return code >= 200 && code <= 399;
+        return code >= 200 && code <= 399;
     }
 
 }

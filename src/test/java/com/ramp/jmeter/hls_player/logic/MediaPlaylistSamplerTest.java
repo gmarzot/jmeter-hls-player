@@ -2,11 +2,7 @@ package com.ramp.jmeter.hls_player.logic;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,11 +14,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 
-public class HlsSamplerTest {
+public class MediaPlaylistSamplerTest {
 	
 	
 
-	private HlsSampler sampler;
+	private MediaPlaylistSampler sampler;
 	private Parser parserMock;
 	
 	@Before
@@ -31,16 +27,14 @@ public class HlsSamplerTest {
 //        TestJMeterUtils.createJmeterEnv();
 		
         parserMock = Mockito.mock(Parser.class);
-        sampler = new HlsSampler();
-		sampler.setURLData("http://www.mock.com/path");
+        sampler = new MediaPlaylistSampler();
+//		sampler.setURLData("http://www.mock.com/path");
 		sampler.setResData("640x360");
 		sampler.setNetworkData("1395723");
-		sampler.setBandwidthType("customBandwidth");
-		sampler.setResolutionType("customResolution");
-		sampler.setUrlVideoType("Bandwidth");
-		sampler.setPRotocol("https");
-		sampler.setPlaySecondsData("20");
-		sampler.setVideoDuration(true);
+		sampler.setBandwidthType(MediaPlaylistSampler.MAX);
+		sampler.setResolutionType(MediaPlaylistSampler.CUSTOM);
+//		sampler.setPlaySecondsData("20");
+//		sampler.setVideoDuration(true);
 		sampler.setParser(parserMock);
 		sampler.setName("Test");
 	}
@@ -135,7 +129,7 @@ public class HlsSamplerTest {
 			.thenReturn(respond4)
 			.thenReturn(respond5);
 
-		Mockito.when(parserMock.selectMediaPlaylist(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class)))
+		Mockito.when(parserMock.selectVideoPlaylist(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class)))
 			.thenReturn("/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d");
 		Mockito.when(parserMock.extractSegmentUris(Mockito.any()))
 				.thenReturn(fragments);
