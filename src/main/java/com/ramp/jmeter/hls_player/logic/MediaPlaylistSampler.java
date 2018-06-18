@@ -19,25 +19,41 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.Math;
 import java.lang.Float;
 import java.lang.Thread;
 
-public class HlsSampler extends AbstractSampler {
+public class MediaPlaylistSampler extends AbstractSampler {
     public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
     public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
     public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
     private static final Logger log = LoggingManager.getLoggerForClass();
 
+    public static final String CUSTOM = "CUSTOM";
+    public static final String MIN = "MIN";
+    public static final String MAX = "MAX";
+
+    public static final String MEDIA_PLAYLIST_TYPE = "HLS.MEDIA_PLAYLIST_TYPE";
+
+    //Video
+    public static final String RESOLUTION_OPTION = "HLS.RESOLUTION_OPTION";
+    public static final String CUSTOM_RESOLUTION = "HLS.CUSTOM_RESOLUTION";
+    public static final String BANDWIDTH_OPTION = "HLS.BANDWIDTH_OPTION";
+    public static final String CUSTOM_BANDWIDTH = "HLS.CUSTOM_BANDWIDTH";
+    //Audio
+    public static final String CUSTOM_AUDIO = "HLS.CUSTOM_AUDIO";
+    //Closed Captions
+    public static final String CUSTOM_CC = "HLS.CUSTOM_CC";
+    public static final String TYPE_VIDEO = "Video";
+    public static final String TYPE_AUDIO = "Audio";
+    public static final String TYPE_SUBTITLES = "Closed Captions";
+
+
     private Parser parser;
 
-    private int durationSeconds = 0; // configured video duration
 
     private DataRequest masterResponse = null;
-    private SampleResult masterResult = null;
 
-    private String playlistPath = null;
-    private String playlist = null;
+    private String playlistUri = null;
 
     private DataRequest playlistResponse = null;
     private SampleResult playlistResult = null;
@@ -45,103 +61,93 @@ public class HlsSampler extends AbstractSampler {
     private boolean isLive = false; // does not have an end tag
     private int targetDuration = 0; // HLS target duration
 
-    private long startTimeMillis = 0; // system time when the video started
     private long lastTimeMillis = 0; // system millis - time of last transaction
     private float playedSeconds = 0; // seconds played since start
 
-    private float lastDurationSeconds = 0;
+    private long nextCallTime = 0;
 
     private List<DataSegment> segments = new ArrayList<>();
     private ArrayList<String> segmentsFetched = new ArrayList<>();
 
-    public HlsSampler() {
+    public MediaPlaylistSampler() {
         super();
-        setName("HLS Player Sampler");
+        setName("HLS Media Playlist Sampler");
         parser = new Parser();
     }
 
     public HeaderManager getHeaderManager() {
-        return (HeaderManager) getProperty(HlsSampler.HEADER_MANAGER).getObjectValue();
+        return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
     }
 
-    private DataRequest getMasterList(SampleResult masterResult, Parser parser) throws IOException {
-
-        masterResult.sampleStart();
-        DataRequest response = parser.getBaseUrl(new URL(getURLData()), masterResult, true);
-        masterResult.sampleEnd();
-
-        masterResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(getURLData()) + "\n\n"
-                + getRequestHeader(this.getHeaderManager()));
-        masterResult.setSuccessful(response.isSuccess());
-        masterResult.setResponseMessage(response.getResponseMessage());
-        masterResult.setSampleLabel("master");
-        masterResult.setResponseHeaders(response.getHeadersAsString());
-        masterResult.setResponseData(response.getResponse().getBytes());
-        masterResult.setResponseCode(response.getResponseCode());
-        masterResult.setContentType(response.getContentType());
-        masterResult.setBytes(masterResult.getBytesAsLong() + (long) masterResult.getRequestHeaders().length());
-
-        int headerBytes = masterResult.getResponseHeaders().length() // condensed
-                // length
-                // (without
-                // \r)
-                + response.getHeaders().size() // Add \r for each header
-                + 1 // Add \r for initial header
-                + 2; // final \r\n before data
-
-        masterResult.setHeadersSize((int) headerBytes);
-        masterResult.setSentBytes(response.getSentBytes());
-        masterResult.setDataEncoding(response.getContentEncoding());
-
-        return response;
-
+    void setPlaylistUri(DataRequest request) {
+        try {
+            playlistUri = getPlaylistUri(request, parser);
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
     }
 
-    private String getPlaylistPath(DataRequest respond, Parser parser) throws MalformedURLException {
-        URL masterURL = new URL(getURLData());
-        String auxPath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
-
-
+    private String getPlaylistUri(DataRequest respond, Parser parser) throws MalformedURLException {
+        URL masterURL = new URL(respond.url);
+        String basePath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
+        log.info("extracting "+this.getMediaPlaylistType()+" playlist uri from master playlist("+respond.url+")");
         String playlistUri = null;
-        if (this.getMediaPlaylistType().equals("Video")) {
-            playlistUri = parser.selectVideoPlaylist(respond.getResponse(),
-                    this.getRESDATA(), this.getNetwordData(),
-                    this.getBandwidthType(), this.getResolutionType());
-        } else if (this.getMediaPlaylistType().equals("Audio")) {
-            playlistUri = parser.selectAudioPlaylist(respond.getResponse(), this.getCustomAudio());
-        } else if (this.getMediaPlaylistType().equals("Closed Captions")) {
-            playlistUri = parser.selectSubtitlesPlaylist(respond.getResponse(), this.getCustomCC());
-        } else {
-            log.error("Unexpected Media Playlist Type: " + this.getMediaPlaylistType());
+        switch (this.getMediaPlaylistType()) {
+            case "Video":
+                playlistUri = parser.selectVideoPlaylist(respond.getResponse(),
+                        this.getRESDATA(), this.getNetwordData(),
+                        this.getBandwidthType(), this.getResolutionType());
+                break;
+            case "Audio":
+                playlistUri = parser.selectAudioPlaylist(respond.getResponse(), this.getCustomAudio());
+                break;
+            case "Closed Captions":
+                playlistUri = parser.selectSubtitlesPlaylist(respond.getResponse(), this.getCustomCC());
+                break;
+            default:
+                log.error("Unexpected Media Playlist Type: " + this.getMediaPlaylistType());
+                break;
         }
 
         if (playlistUri == null) {
-            log.warn("Unable to select playlist, assuming media playlist supplied.");
-            playlistUri = getURLData(); // the supplied url is the media playlist possibly
+            log.warn("Unable to select playlist, testing if media playlist supplied.");
+            if(!respond.getResponse().contains("#EXTINF")){
+                log.error("The playlist is neither master or media");
+                return null;
+            }
+            playlistUri = respond.url; // the supplied url is the media playlist possibly
+        }
+
+        if (playlistUri.indexOf('/') == 0) {//relative to host
+            playlistUri = masterURL.getProtocol() + "://" + masterURL.getHost() + (masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "") + playlistUri;
+        } else if (!playlistUri.startsWith("http")) {//relative to base path
+            playlistUri = masterURL.getProtocol() + "://" + masterURL.getHost() + (masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "") + basePath + playlistUri;
         }
 
         log.info("playlistUri: " + playlistUri);
 
-        if (playlistUri.startsWith("http")) {
-            playlist = playlistUri;
-        } else if (playlistUri.indexOf('/') == 0) {
-            playlist = masterURL.getProtocol() + "://" + masterURL.getHost() + (masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "") + playlistUri;
-        } else {
-            playlist = masterURL.getProtocol() + "://" + masterURL.getHost() + (masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "") + auxPath + playlistUri;
-        }
-
-        auxPath = playlist.substring(0, playlist.lastIndexOf('/') + 1);
-
-        return auxPath;
+        return playlistUri;
     }
 
+    private String getCustomCC() {
+        return this.getPropertyAsString(CUSTOM_CC);
+    }
+
+    private String getCustomAudio() {
+        return this.getPropertyAsString(CUSTOM_AUDIO);
+    }
+
+    private String getMediaPlaylistType() {
+        return this.getPropertyAsString(MEDIA_PLAYLIST_TYPE);
+    }
 
     private DataRequest getPlaylist(SampleResult playListResult, Parser parser) throws IOException {
+
         playListResult.sampleStart();
-        DataRequest response = parser.getBaseUrl(new URL(playlist), playListResult, true);
+        DataRequest response = parser.getBaseUrl(new URL(playlistUri), playListResult, true);
         playListResult.sampleEnd();
 
-        playListResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(playlist) + "\n\n"
+        playListResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(playlistUri) + "\n\n"
                 + getRequestHeader(this.getHeaderManager()));
         playListResult.setSuccessful(response.isSuccess());
         playListResult.setResponseMessage(response.getResponseMessage());
@@ -170,20 +176,22 @@ public class HlsSampler extends AbstractSampler {
     @Override
     public SampleResult sample(Entry e) {
         try {
-            if (masterResult == null) {
-                log.info("getting master");
-                masterResult = new SampleResult();
-                masterResponse = getMasterList(masterResult, parser);
-                playlistPath = getPlaylistPath(masterResponse, parser);
-                startTimeMillis = System.currentTimeMillis();
-                return masterResult;
+            if (masterResponse == null) {
+                log.error("Master Playlist Missing");
+                nextCallTime = -1;
+                return null;
+            }
+            if (playlistUri == null) {
+                playlistUri = getPlaylistUri(masterResponse, parser);
+                if (playlistUri == null) {
+                    log.error("Unable to get playlist path");
+                    nextCallTime = -1;
+                    return null;
+                }
             }
 
-            log.info("sample: playlistPath: " + playlistPath + " playlist: " + playlist +
+            log.info("sample: playlistUri: " + playlistUri +
                     " thread: " + Thread.currentThread().getName());
-
-            if (getVideoDuration())
-                durationSeconds = Integer.parseInt(getPlAYSecondsData());
 
             while (true) {
                 if (segments.isEmpty()) {
@@ -198,6 +206,7 @@ public class HlsSampler extends AbstractSampler {
                     playlistResult = new SampleResult();
                     playlistResponse = getPlaylist(playlistResult, parser);
                     segments.addAll(parser.extractSegmentUris(playlistResponse.getResponse()));
+                    log.info("parsed " + segments.size() + " segments out of playlist");
                     lastTimeMillis = now;
 
                     int td = parser.getTargetDuration(playlistResponse.getResponse());
@@ -214,6 +223,7 @@ public class HlsSampler extends AbstractSampler {
                     if (isLive) {
                         log.info("sample: detected live playlist");
                     }
+                    nextCallTime = System.currentTimeMillis();
                     return playlistResult;
                 } else {
                     DataSegment segment = segments.remove(0);
@@ -221,149 +231,54 @@ public class HlsSampler extends AbstractSampler {
                         String durationStr = segment.getDuration();
                         float duration = Float.parseFloat(durationStr);
                         log.info("segment duration: " + durationStr + " (" + duration + ")");
-
-                        // playedSeconds is the total current playtime including the duration of the last segment
-                        // we wait when this time is in the future
-                        if (lastDurationSeconds > 0) playedSeconds += lastDurationSeconds;
-                        long now = System.currentTimeMillis();
-                        if ((now - startTimeMillis) < Math.round(playedSeconds * 1000)) {
-                            try {
-                                long sleepMillis = (startTimeMillis + Math.round(playedSeconds * 1000) - now);
-                                log.info("sample: sleeping: " + sleepMillis);
-                                Thread.sleep(sleepMillis); // only get segment when finished playing the one before
-                            } catch (InterruptedException e1) {
-                                log.warn("sample: Thead.sleep() interupted");
-                            }
-                        }
-                        lastDurationSeconds = duration;
-                        SampleResult segmentResult = getSegment(parser, segment, playlistPath);
+                        String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
+                        SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
                         segmentsFetched.add(segment.getUri().trim());
+                        nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
+                        log.info("Next Call Time: " + nextCallTime);
                         return segmentResult;
-                    }
-                }
-
-                if (getVideoDuration()) {
-                    if (playedSeconds > durationSeconds) {
-                        break;
                     }
                 }
             }
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        log.warn("Sampler returning null!");
+        nextCallTime = -1;
         return null;
     }
 
-
-    private void initHlsSamplerData() {
-        masterResponse = null;
-        if (segments != null) segments.clear();
-        if (segmentsFetched != null) segmentsFetched.clear();
-        playlistPath = null;
-        playlist = null;
-        playlistResponse = null;
-        playlistResult = null;
-        isLive = false; // does not have an end tag
-        targetDuration = 0;
-        playedSeconds = 0;
-        lastDurationSeconds = 0;
-        startTimeMillis = 0;
-        lastTimeMillis = 0;
-    }
-
-    public String getURLData() {
-        return this.getPropertyAsString("HLS.URL_DATA");
-    }
-
-    public String getMediaPlaylistType() {
-        return this.getPropertyAsString("HLS.PLAYLIST_TYPE");
-    }
-
     public String getRESDATA() {
-        return this.getPropertyAsString("HLS.RES_DATA");
+        return this.getPropertyAsString(CUSTOM_RESOLUTION);
     }
 
     public String getNetwordData() {
-        return this.getPropertyAsString("HLS.NET_DATA");
-    }
-
-    public String getPlAYSecondsData() {
-        return this.getPropertyAsString("HLS.SECONDS_DATA");
-    }
-
-    public boolean getVideoDuration() {
-        return this.getPropertyAsBoolean("HLS.DURATION");
-    }
-
-    public String getVideoType() {
-        return this.getPropertyAsString("HLS.VIDEOTYPE");
+        return this.getPropertyAsString(CUSTOM_BANDWIDTH);
     }
 
     public String getResolutionType() {
-        return this.getPropertyAsString("HLS.RESOLUTION_TYPE");
+        return this.getPropertyAsString(RESOLUTION_OPTION);
     }
 
     public String getBandwidthType() {
-        return this.getPropertyAsString("HLS.BANDWIDTH_TYPE");
+        return this.getPropertyAsString(BANDWIDTH_OPTION);
     }
 
-    public String getHlsVideoType() {
-        return this.getPropertyAsString("HLS.VIDEOTYPE");
-    }
-
-    public String getPRotocol() {
-        return this.getPropertyAsString("HLS.PROTOCOL");
-    }
-
-    public void setURLData(String url) {
-
-        this.setProperty("HLS.URL_DATA", url);
-    }
-
-    public void setMediaPlaylistType(String playlistType) {
-        this.setProperty("HLS.PLAYLIST_TYPE", playlistType);
-    }
 
     public void setResData(String res) {
-
-        this.setProperty("HLS.RES_DATA", res);
+        this.setProperty(CUSTOM_RESOLUTION, res);
     }
 
     public void setNetworkData(String net) {
-        this.setProperty("HLS.NET_DATA", net);
-    }
-
-    public void setVideoDuration(boolean res) {
-        this.setProperty("HLS.DURATION", res);
-    }
-
-    public void setPlaySecondsData(String seconds) {
-
-        this.setProperty("HLS.SECONDS_DATA", seconds);
-    }
-
-    public void setPRotocol(String protocolValue) {
-        this.setProperty("HLS.PROTOCOL", protocolValue);
-    }
-
-    public void setHlsDuration(String duration) {
-        this.setProperty("HLS.DURATION", duration);
+        this.setProperty(CUSTOM_BANDWIDTH, net);
     }
 
     public void setResolutionType(String type) {
-        this.setProperty("HLS.RESOLUTION_TYPE", type);
+        this.setProperty(RESOLUTION_OPTION, type);
     }
 
     public void setBandwidthType(String type) {
-        this.setProperty("HLS.BANDWIDTH_TYPE", type);
-    }
-
-    public void setHlsVideoType(String type) {
-        this.setProperty("HLS.VIDEOTYPE", type);
-    }
-
-    public void setUrlVideoType(String type) {
-        this.setProperty("HLS.URLVIDEOTYPE", type);
+        this.setProperty(BANDWIDTH_OPTION, type);
     }
 
     public SampleResult getSegment(Parser parser, DataSegment seg, String url) {
@@ -387,7 +302,19 @@ public class HlsSampler extends AbstractSampler {
                     + getRequestHeader(this.getHeaderManager()));
             result.setSuccessful(respond.isSuccess());
             result.setResponseMessage(respond.getResponseMessage());
-            result.setSampleLabel("video_segment");
+            switch (this.getMediaPlaylistType()) {
+                case TYPE_VIDEO:
+                    result.setSampleLabel("video_segment");
+                    break;
+                case TYPE_AUDIO:
+                    result.setSampleLabel("audio_segment");
+                    break;
+                case TYPE_SUBTITLES:
+                    result.setSampleLabel("subtitle_segment");
+                    break;
+                default:
+                    log.error("Unknown media type");
+            }
             result.setResponseHeaders("URL: " + uriString + "\n" + respond.getHeadersAsString());
             result.setResponseCode(respond.getResponseCode());
             result.setContentType(respond.getContentType());
@@ -515,19 +442,11 @@ public class HlsSampler extends AbstractSampler {
         parser = p;
     }
 
-    public void setCustomAudio(String customAuido) {
-        this.setProperty("HLS.CUSTOM_AUDIO", customAuido);
+    public long getNextCallTimeMillis() {
+        return nextCallTime;
     }
 
-    public String getCustomAudio() {
-        return this.getPropertyAsString("HLS.CUSTOM_AUDIO");
-    }
-
-    public void setCustomCC(String customCC) {
-        this.setProperty("HLS.CUSTOM_CC", customCC);
-    }
-
-    public String getCustomCC() {
-        return this.getPropertyAsString("HLS.CUSTOM_CC");
+    public void setMasterPlaylist(DataRequest masterResponse) {
+        this.masterResponse = masterResponse;
     }
 }

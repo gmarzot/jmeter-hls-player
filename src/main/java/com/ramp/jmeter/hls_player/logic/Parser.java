@@ -36,6 +36,8 @@ public class Parser implements Serializable {
 
         sampleResult.connectEnd();
 
+        result.url = url.toString();
+
         // By default it is GET request
         con.setRequestMethod("GET");
 
@@ -125,20 +127,20 @@ public class Parser implements Serializable {
     private boolean resolutionOK(String streamResolution, String currentResolution, String matchMode, String customResolution) {
         log.info("resolutionOK: " + streamResolution + ", " + currentResolution + ", " + matchMode + ", " + currentResolution);
 
-        if (matchMode.equalsIgnoreCase("customResolution")) {
+        if (matchMode.equalsIgnoreCase(MediaPlaylistSampler.CUSTOM)) {
             if (customResolution != null) {
                 return customResolution.equals(streamResolution);
             }
             log.error("selection mode is customResolution, but no custom resolution set");
             return false;
-        } else if (matchMode.equalsIgnoreCase("minResolution")) {
+        } else if (matchMode.equalsIgnoreCase(MediaPlaylistSampler.MIN)) {
             if (currentResolution == null) {
                 return true;
             } else {
                 if (streamResolution == null) return false;
                 return (resolutionCompare(streamResolution, currentResolution) <= 0);
             }
-        } else if (matchMode.equalsIgnoreCase("maxResolution")) {
+        } else if (matchMode.equalsIgnoreCase(MediaPlaylistSampler.MAX)) {
             if (currentResolution == null) {
                 return true;
             } else {
@@ -165,8 +167,8 @@ public class Parser implements Serializable {
 
     public String selectVideoPlaylist(String playlistData, String customResolution, String customBandwidth, String bwSelected, String resSelected) {
         String streamPattern = "(EXT-X-STREAM-INF.*)\\n(.*\\.m3u8.*)";
-        String bandwidthPattern = "[:|,]BANDWIDTH=(\\d+)";
-        String resolutionPattern = "[:|,]RESOLUTION=(\\d+x\\d+)";
+        String bandwidthPattern = "[:|,]\\W*BANDWIDTH=(\\d+)";
+        String resolutionPattern = "[:|,]\\W*RESOLUTION=(\\d+x\\d+)";
 
         return getVideoUri(streamPattern, bandwidthPattern, resolutionPattern, playlistData, customResolution, customBandwidth, bwSelected, resSelected);
     }
@@ -212,14 +214,14 @@ public class Parser implements Serializable {
                 continue;
             }
 
-            if (bwSelected.equalsIgnoreCase("customBandwidth")) {
+            if (bwSelected.equalsIgnoreCase(MediaPlaylistSampler.CUSTOM)) {
                 if (Integer.parseInt(mb.group(1)) == Integer.parseInt(customBandwidth)) {
                     if (resolutionOK((rfound ? mr.group(1) : null), curResolution, resSelected, customResolution)) {
                         curResolution = (rfound ? mr.group(1) : null);
                         uri = m.group(2);
                     }
                 }
-            } else if (bwSelected.equalsIgnoreCase("minBandwidth")) {
+            } else if (bwSelected.equalsIgnoreCase(MediaPlaylistSampler.MIN)) {
                 if (curBandwidth == null || (Integer.parseInt(mb.group(1)) <= Integer.parseInt(curBandwidth))) {
                     curBandwidth = mb.group(1);
                     if (resolutionOK((rfound ? mr.group(1) : null), curResolution, resSelected, customResolution)) {
@@ -228,7 +230,7 @@ public class Parser implements Serializable {
                     }
                 }
 
-            } else if (bwSelected.equalsIgnoreCase("maxBandwidth")) {
+            } else if (bwSelected.equalsIgnoreCase(MediaPlaylistSampler.MAX)) {
                 if (curBandwidth == null || (Integer.parseInt(mb.group(1)) >= Integer.parseInt(curBandwidth))) {
                     curBandwidth = mb.group(1);
                     if (resolutionOK((rfound ? mr.group(1) : null), curResolution, resSelected, customResolution)) {

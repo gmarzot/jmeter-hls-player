@@ -14,11 +14,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 
-public class HlsSamplerTest {
+public class MediaPlaylistSamplerTest {
 	
 	
 
-	private HlsSampler sampler;
+	private MediaPlaylistSampler sampler;
 	private Parser parserMock;
 	
 	@Before
@@ -27,16 +27,14 @@ public class HlsSamplerTest {
 //        TestJMeterUtils.createJmeterEnv();
 		
         parserMock = Mockito.mock(Parser.class);
-        sampler = new HlsSampler();
-		sampler.setURLData("http://www.mock.com/path");
+        sampler = new MediaPlaylistSampler();
+//		sampler.setURLData("http://www.mock.com/path");
 		sampler.setResData("640x360");
 		sampler.setNetworkData("1395723");
-		sampler.setBandwidthType("customBandwidth");
-		sampler.setResolutionType("customResolution");
-		sampler.setUrlVideoType("Bandwidth");
-		sampler.setPRotocol("https");
-		sampler.setPlaySecondsData("20");
-		sampler.setVideoDuration(true);
+		sampler.setBandwidthType(MediaPlaylistSampler.MAX);
+		sampler.setResolutionType(MediaPlaylistSampler.CUSTOM);
+//		sampler.setPlaySecondsData("20");
+//		sampler.setVideoDuration(true);
 		sampler.setParser(parserMock);
 		sampler.setName("Test");
 	}

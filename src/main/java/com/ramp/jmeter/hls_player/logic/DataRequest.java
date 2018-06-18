@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DataRequest {
+	public String url;
 	public Map<String, List<String>> headers;
 	private String response;
 	private String responseCode;
