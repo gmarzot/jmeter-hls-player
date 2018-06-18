@@ -1,6 +1,6 @@
 # HLS PLAYER PLUGIN
-The HLS protocol provides an open, reliable, efficient means of delivering continuous and video (live or VOD) over the Internet using standard HTTP transport. It allows a receiver to adapt the bitrate of the media to the current network conditions, in order to maintain uninterrupted playback at the best possible quality.
- #### In a HTTP Live Streaming process:
+The HLS protocol provides an open, reliable, efficient means of delivering continuous video streaming (live or VOD) over the Internet using a standard HTTP transport. It allows a receiver to adapt the bitrate of the media to the current network conditions, in order to maintain uninterrupted playback at the best possible quality. Using HTTP in this way in many cases allows the content to be cached for efficient and scalable delivery to large audiences.
+ #### HTTP Live Streaming process:
 - The audio/video to be streamed is reproduced by a media encoder at different quality levels, bitrates and resolutions. Each version is called a variant.
 - The different variants are split up into smaller Media Segment Files.
 - The encoder creates a Media Playlist for each variant with the URLs of each Media Segment.
@@ -10,7 +10,7 @@ To play, the client first downloads the Master Playlist, and then the Media Play
 ### Concept
 This plugin handles HLS playback complexity internally as an intelligent logic controller test element. After getting the master playlist file, a variant stream is chosen according the criteria configured in each Media Playlist Sampler, which in-turn gets the media playlist file, the segments, etc. The plugin simulates typical client player logic, and correspondingly presents the equivalent network load as a browser-based player would. Individual media playlist samplers provide fine grain control of stream type(video, audio, closed-captions), and can select played content based on network bandwidth, media advertised resolution, or custom criteria.
 
-### To create your test
+### To Create Your Test
 - Install the HLS Player plugin from the Plugins Manager
 - Create a Thread Group.
 - Add the HLS Player Add -> Logic Controller -> HLS Player
@@ -48,4 +48,4 @@ After selecting the desired bandwidth you can select a resolution to simulate yo
 You can set listeners to evaluate the results of your tests (e.g., Graph Results). The View Results Tree Listener can be used to display the HLS HTTP transactions, to observe details of the requests and responses involved (debug only).
 
 # Acknowledgement
-This plugin was initially based on Blazemeter HLS Plugin but has changed form considerably in this implemention. Thanks to Blazemeter for their initial work in this area.
+This plugin was initially based on the Blazemeter HLS Plugin, but has changed form considerably in this implemention. Thanks to Blazemeter for their initial work in this area.
