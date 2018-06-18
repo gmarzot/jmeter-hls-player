@@ -47,5 +47,5 @@ After selecting the desired bandwidth you can select a resolution to simulate yo
 ## Results
 You can set listeners to evaluate the results of your tests (e.g., Graph Results). The View Results Tree Listener can be used to display the HLS HTTP transactions, to observe details of the requests and responses involved (debug only).
 
-# Acknowledgement
+## Acknowledgement
 This plugin was initially based on the Blazemeter HLS Plugin, but has changed form considerably in this implemention. Thanks to Blazemeter for their initial work in this area.
