@@ -73,6 +73,7 @@ public class MediaPlaylistSamplerTest {
         headers.put("headerKey3", header3);
 
 		respond1.setRequestHeaders("GET  http://www.mock.com/path\n");
+		respond1.url = "http://www.mock.com/path";
 		respond1.setHeaders(headers);
 		respond1.setResponse(payload1);
 		respond1.setResponseCode("200");
@@ -83,6 +84,7 @@ public class MediaPlaylistSamplerTest {
 		respond1.setContentEncoding("UTF-8");
 
 		respond2.setRequestHeaders("GET  http://www.mock.com/path/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n");
+		respond2.url = "http://www.mock.com/path/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 		respond2.setHeaders(headers);
 		respond2.setResponse(payload2);
 		respond2.setResponseCode("200");
@@ -139,13 +141,15 @@ public class MediaPlaylistSamplerTest {
 
 		assertFalse(sampler == null);
 
+		sampler.setProperty("HLS.MEDIA_PLAYLIST_TYPE", "Video");
+		sampler.setMasterPlaylist(respond1);
 		SampleResult result = sampler.sample(null);
 
 		assertFalse(result == null);
 		assertEquals("GET  http://www.mock.com/path\n\n\n\n\n", result.getRequestHeaders());
 		assertEquals(true, result.isSuccessful());
 		assertEquals("OK", result.getResponseMessage());
-		assertEquals("master", result.getSampleLabel());
+		assertEquals("playlist", result.getSampleLabel());
 		assertEquals("headerKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", result.getResponseHeaders());
 		assertEquals(new String(payload1.getBytes(), "UTF-8"), new String(result.getResponseData(), "UTF-8"));
 		assertEquals("200", result.getResponseCode());

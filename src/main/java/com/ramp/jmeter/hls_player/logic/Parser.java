@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.http.protocol.HTTP.USER_AGENT;
 
 public class Parser implements Serializable {
-    private static final Logger log = LoggingManager.getLoggerForClass();
+    private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
     public Parser() {
     }
@@ -211,6 +211,7 @@ public class Parser implements Serializable {
             boolean bfound = mb.find();
 
             if (!bfound) {
+                log.error("unable to identify bandwidth");
                 continue;
             }
 

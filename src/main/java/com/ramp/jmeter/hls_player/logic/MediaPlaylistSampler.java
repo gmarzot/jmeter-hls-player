@@ -11,8 +11,9 @@ import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jmeter.testelement.property.TestElementProperty;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -26,7 +27,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
     public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
     public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
-    private static final Logger log = LoggingManager.getLoggerForClass();
+    private static final Logger log = LoggerFactory.getLogger(MediaPlaylistSampler.class);
 
     public static final String CUSTOM = "CUSTOM";
     public static final String MIN = "MIN";
@@ -398,7 +399,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     public void setHeaderManager(HeaderManager value) {
         HeaderManager mgr = getHeaderManager();
         if (mgr != null) {
-            value = mgr.merge(value, true);
+            value = mgr.merge(value);
             if (log.isDebugEnabled()) {
                 log.debug("Existing HeaderManager '" + mgr.getName() + "' merged with '" + value.getName() + "'");
                 for (int i = 0; i < value.getHeaders().size(); i++) {

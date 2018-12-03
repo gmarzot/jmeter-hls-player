@@ -111,7 +111,7 @@ public class ParserTest {
  */
 		
 
-		String result = p.selectVideoPlaylist(res, "280x180", "170129", "customBandwidth", "customResolution");
+		String result = p.selectVideoPlaylist(res, "280x180", "170129", "CUSTOM", "CUSTOM");
 		String expected = "/videos/DianaLaufenberg_2010X/video/56k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println(res);
@@ -123,7 +123,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "640x360", "1395723", "customBandwidth", "customResolution");
+		result = p.selectVideoPlaylist(res, "640x360", "1395723", "CUSTOM", "CUSTOM");
 		expected = "/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("customBandwidth(1395723), customResolution(640x360)");
@@ -132,7 +132,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "320x180", "", "minBandwidth", "customResolution");
+		result = p.selectVideoPlaylist(res, "320x180", "", "MIN", "CUSTOM");
 		expected = "/videos/DianaLaufenberg_2010X/video/64k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("minBandwidth, customResolution(320x180)");
@@ -141,7 +141,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "640x480", "", "maxBandwidth", "customResolution");
+		result = p.selectVideoPlaylist(res, "640x480", "", "MAX", "CUSTOM");
 		expected = "/videos/DianaLaufenberg_2010X/video/680k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("maxBandwidth, customResolution(640x480)");
@@ -150,7 +150,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "640x480", "1395723", "customBandwidth", "customResolution");
+		result = p.selectVideoPlaylist(res, "640x480", "1395723", "CUSTOM", "CUSTOM");
 		expected = "/videos/DianaLaufenberg_2010X/video/680k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("customBandwidth(1395723), customResolution(640x480)");
@@ -159,7 +159,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "640x360", "", "minBandwidth", "customResolution");
+		result = p.selectVideoPlaylist(res, "640x360", "", "MIN", "CUSTOM");
 		expected = "/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("minBandwidth, customResolution(640x360)");
@@ -168,7 +168,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "640x360", "", "maxBandwidth", "customResolution");
+		result = p.selectVideoPlaylist(res, "640x360", "", "MAX", "CUSTOM");
 		expected = "/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("maxBandwidth, customResolution(640x360)");
@@ -177,7 +177,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "", "1395723", "customBandwidth", "maxResolution");
+		result = p.selectVideoPlaylist(res, "", "1395723", "CUSTOM", "MAX");
 		expected = "/videos/DianaLaufenberg_2010X/video/680k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("customBandwidth(1395723), maxResolution");
@@ -186,7 +186,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "", "", "minBandwidth", "maxResolution");
+		result = p.selectVideoPlaylist(res, "", "", "MIN", "MAX");
 		expected = "/videos/DianaLaufenberg_2010X/video/680k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("minBandwidth, maxResolution");
@@ -195,7 +195,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "", "", "maxBandwidth", "maxResolution");
+		result = p.selectVideoPlaylist(res, "", "", "MAX", "MAX");
 		expected = "/videos/DianaLaufenberg_2010X/video/680k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("maxBandwidth, maxResolution");
@@ -204,7 +204,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "", "1395723", "customBandwidth", "minResolution");
+		result = p.selectVideoPlaylist(res, "", "1395723", "CUSTOM", "MIN");
 		expected = "/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("customBandwidth(1395723), minResolution");
@@ -213,7 +213,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "", "", "minBandwidth", "minResolution");
+		result = p.selectVideoPlaylist(res, "", "", "MIN", "MIN");
 		expected = "/videos/DianaLaufenberg_2010X/video/56k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("minBandwidth, minResolution");
@@ -222,7 +222,7 @@ public class ParserTest {
 		System.out.println("*********");
 		assertEquals(expected, result);
 
-		result = p.selectVideoPlaylist(res, "", "", "maxBandwidth", "minResolution");
+		result = p.selectVideoPlaylist(res, "", "", "MAX", "MIN");
 		expected = "/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 
 		System.out.println("maxBandwidth, minResolution");
