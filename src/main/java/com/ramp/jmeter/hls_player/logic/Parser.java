@@ -26,7 +26,6 @@ public class Parser implements Serializable {
 
     // HTTP GET request
     public DataRequest getBaseUrl(URL url, SampleResult sampleResult, boolean setRequest) throws IOException {
-
         HttpURLConnection con = null;
         DataRequest result = new DataRequest();
         boolean first = true;
@@ -47,7 +46,7 @@ public class Parser implements Serializable {
         // Set request header
         result.setRequestHeaders(con.getRequestMethod() + "  " + url.toString() + "\n");
 
-        int responseCode = con.getResponseCode();
+	int responseCode = con.getResponseCode();
 
         // Reading response from input Stream
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -75,18 +74,22 @@ public class Parser implements Serializable {
         result.setResponse(response.toString());
         result.setResponseCode(String.valueOf(responseCode));
         result.setResponseMessage(con.getResponseMessage());
-        result.setContentType(con.getContentType());
+	String content_type = con.getContentType();
+	if (content_type == null || content_type.isEmpty()) {
+	    log.warn("null or emtpy content-type url: " + url.toString());
+	    content_type = "application/json;charset=UTF-8";
+	}
+        result.setContentType(content_type);
         result.setSuccess(isSuccessCode(responseCode));
         result.setSentBytes(sentBytes);
-        result.setContentEncoding(getEncoding(con));
+        result.setContentEncoding(getEncoding(content_type));
 
         return result;
 
     }
 
-    public String getEncoding(HttpURLConnection connection) {
-        String contentType = connection.getContentType();
-        String[] values = contentType.split(";"); // values.length should be 2
+    public String getEncoding(String content_type) {
+        String[] values = content_type.split(";"); // values.length should be 2
         String charset = "";
 
         for (String value : values) {
@@ -106,11 +109,9 @@ public class Parser implements Serializable {
         final List<DataSegment> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(playlistUrl);
-        log.info("playlist: " + playlistUrl);
 
         while (m.find()) {
             DataSegment data = new DataSegment(m.group(1), m.group(3));
-            log.info("duration: " + m.group(1) + " fragment: " + m.group(3));
             mediaList.add(data);
         }
         return mediaList;
@@ -191,9 +192,6 @@ public class Parser implements Serializable {
 
     public String getVideoUri(String streamPattern, String bandwidthPattern, String resolutionPattern, String playlistData,
                               String customResolution, String customBandwidth, String bwSelected, String resSelected) {
-        String bandwidthMax = "100000000";
-        String resolutionMin = "100x100";
-        String resolutionMax = "5000x5000";
         String curBandwidth = null;
         String curResolution = null;
         String uri = null;
@@ -204,10 +202,12 @@ public class Parser implements Serializable {
         Pattern b = Pattern.compile(bandwidthPattern);
         Pattern r = Pattern.compile(resolutionPattern);
 
+	String playlist_entry = "<null>";
         while (m.find()) {
-            Matcher mr = r.matcher(m.group(1));
+	    playlist_entry = m.group(1);
+            Matcher mr = r.matcher(playlist_entry);
             boolean rfound = mr.find();
-            Matcher mb = b.matcher(m.group(1));
+            Matcher mb = b.matcher(playlist_entry);
             boolean bfound = mb.find();
 
             if (!bfound) {
@@ -245,8 +245,10 @@ public class Parser implements Serializable {
             }
 
         }
-        return uri;
 
+	log.info("getVideoUri selected playlist entry: " + playlist_entry);
+	log.info("getVideoUri return: " + uri);
+        return uri;
     }
 
     public boolean isLive(String playlistData) {

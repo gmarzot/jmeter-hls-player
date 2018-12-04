@@ -91,7 +91,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     private String getPlaylistUri(DataRequest respond, Parser parser) throws MalformedURLException {
         URL masterURL = new URL(respond.url);
         String basePath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
-        log.info("extracting "+this.getMediaPlaylistType()+" playlist uri from master playlist("+respond.url+")");
+        log.info("extracting "+this.getMediaPlaylistType()+" playlist uri from master playlist("+respond.url+") baseurl("+basePath+")");
         String playlistUri = null;
         switch (this.getMediaPlaylistType()) {
             case "Video":
@@ -295,10 +295,12 @@ public class MediaPlaylistSampler extends AbstractSampler {
         result.sampleStart();
 
         try {
+            log.info("MPS about to getBaseUrl: " + uriString);
             DataRequest respond = parser.getBaseUrl(new URL(uriString), result, false);
 
             result.sampleEnd();
 
+            log.info("MPS sample end: " + respond.getResponseMessage());
             result.setRequestHeaders(respond.getRequestHeaders() + "\n\n" + getCookieHeader(uriString) + "\n\n"
                     + getRequestHeader(this.getHeaderManager()));
             result.setSuccessful(respond.isSuccess());
@@ -334,6 +336,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
             result.setSuccessful(false);
             result.setResponseMessage("Exception: " + e1);
         }
+	log.info("MPS exit: " + result);
 
         return result;
     }
