@@ -191,8 +191,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
                 }
             }
 
-            log.info("sample: playlistUri: " + playlistUri +
-                    " thread: " + Thread.currentThread().getName());
+            //log.info("sample: playlistUri: " + playlistUri + " thread: " + Thread.currentThread().getName());
 
             while (true) {
                 if (segments.isEmpty()) {
@@ -207,7 +206,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     playlistResult = new SampleResult();
                     playlistResponse = getPlaylist(playlistResult, parser);
                     segments.addAll(parser.extractSegmentUris(playlistResponse.getResponse()));
-                    log.info("parsed " + segments.size() + " segments out of playlist");
+                    //log.info("parsed " + segments.size() + " segments out of playlist");
                     lastTimeMillis = now;
 
                     int td = parser.getTargetDuration(playlistResponse.getResponse());
@@ -231,12 +230,12 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     if ((segmentsFetched.size() == 0) || (!segmentsFetched.contains(segment.getUri().trim()))) {
                         String durationStr = segment.getDuration();
                         float duration = Float.parseFloat(durationStr);
-                        log.info("segment duration: " + durationStr + " (" + duration + ")");
+                        log.debug("segment duration: " + durationStr + " (" + duration + ")");
                         String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
                         SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
                         segmentsFetched.add(segment.getUri().trim());
                         nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
-                        log.info("Next Call Time: " + nextCallTime);
+                        log.debug("Next Call Time: " + nextCallTime);
                         return segmentResult;
                     }
                 }
@@ -286,21 +285,18 @@ public class MediaPlaylistSampler extends AbstractSampler {
         SampleResult result = new SampleResult();
 
         String uriString = seg.getUri();
-        log.info("url: " + (url != null ? url : "<null>") + " uriString: " + uriString);
+        // log.info("url: " + (url != null ? url : "<null>") + " uriString: " + uriString);
         if ((url != null) && (!uriString.startsWith("http"))) {
             uriString = url + uriString;
-            log.info("uriString: " + uriString);
         }
 
         result.sampleStart();
 
         try {
-            log.info("MPS about to getBaseUrl: " + uriString);
             DataRequest respond = parser.getBaseUrl(new URL(uriString), result, false);
 
             result.sampleEnd();
 
-            log.info("MPS sample end: " + respond.getResponseMessage());
             result.setRequestHeaders(respond.getRequestHeaders() + "\n\n" + getCookieHeader(uriString) + "\n\n"
                     + getRequestHeader(this.getHeaderManager()));
             result.setSuccessful(respond.isSuccess());
@@ -336,7 +332,6 @@ public class MediaPlaylistSampler extends AbstractSampler {
             result.setSuccessful(false);
             result.setResponseMessage("Exception: " + e1);
         }
-	log.info("MPS exit: " + result);
 
         return result;
     }
