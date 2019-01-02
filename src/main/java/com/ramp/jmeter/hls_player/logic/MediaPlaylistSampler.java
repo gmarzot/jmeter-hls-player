@@ -60,15 +60,15 @@ public class MediaPlaylistSampler extends AbstractSampler {
     private SampleResult playlistResult = null;
 
     private boolean isLive = false; // does not have an end tag
+    private boolean isFirstSample = true;
     private int targetDuration = 0; // HLS target duration
 
     private long lastTimeMillis = 0; // system millis - time of last transaction
-    private float playedSeconds = 0; // seconds played since start
 
     private long nextCallTime = 0;
 
-    private List<DataSegment> segments = new ArrayList<>();
-    private ArrayList<String> segmentsFetched = new ArrayList<>();
+    private List<DataSegment> segmentsToGet = new ArrayList<>();
+    private DataSegment lastExtracted = null;
 
     public MediaPlaylistSampler() {
         super();
@@ -194,7 +194,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
             //log.info("sample: playlistUri: " + playlistUri + " thread: " + Thread.currentThread().getName());
 
             while (true) {
-                if (segments.isEmpty()) {
+                if (segmentsToGet.isEmpty()) {
                     long now = System.currentTimeMillis();
                     if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
                         try {
@@ -205,8 +205,24 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     }
                     playlistResult = new SampleResult();
                     playlistResponse = getPlaylist(playlistResult, parser);
-                    segments.addAll(parser.extractSegmentUris(playlistResponse.getResponse()));
-                    //log.info("parsed " + segments.size() + " segments out of playlist");
+
+                    isLive = parser.isLive(playlistResponse.getResponse());
+                    if (isLive) {
+                        log.info("sample: detected live playlist");
+                        if (isFirstSample) {
+                            log.debug("First Sample");
+                            segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), 3));
+                            isFirstSample = false;
+                        }else {
+                            log.debug("Not first sample");
+                            segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
+                        }
+                    } else {
+                        log.debug("Not live");
+                        segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
+                    }
+
+                    log.debug("parsed " + segmentsToGet.size() + " segmentsToGet out of playlist");
                     lastTimeMillis = now;
 
                     int td = parser.getTargetDuration(playlistResponse.getResponse());
@@ -219,25 +235,20 @@ public class MediaPlaylistSampler extends AbstractSampler {
                         targetDuration = td;
                     }
 
-                    isLive = parser.isLive(playlistResponse.getResponse());
-                    if (isLive) {
-                        log.info("sample: detected live playlist");
-                    }
+
                     nextCallTime = System.currentTimeMillis();
                     return playlistResult;
                 } else {
-                    DataSegment segment = segments.remove(0);
-                    if ((segmentsFetched.size() == 0) || (!segmentsFetched.contains(segment.getUri().trim()))) {
-                        String durationStr = segment.getDuration();
-                        float duration = Float.parseFloat(durationStr);
-                        log.debug("segment duration: " + durationStr + " (" + duration + ")");
-                        String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
-                        SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
-                        segmentsFetched.add(segment.getUri().trim());
-                        nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
-                        log.debug("Next Call Time: " + nextCallTime);
-                        return segmentResult;
-                    }
+                    DataSegment segment = segmentsToGet.remove(0);
+                    String durationStr = segment.getDuration();
+                    float duration = Float.parseFloat(durationStr);
+                    log.debug("segment duration: " + durationStr + " (" + duration + ")");
+                    String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
+                    SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
+                    lastExtracted = segment;
+                    nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
+                    log.debug("Next Call Time: " + nextCallTime);
+                    return segmentResult;
                 }
             }
         } catch (IOException e1) {

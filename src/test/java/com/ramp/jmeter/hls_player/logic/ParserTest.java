@@ -1,6 +1,7 @@
 package com.ramp.jmeter.hls_player.logic;
 
 import org.apache.jmeter.samplers.SampleResult;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -232,4 +233,59 @@ public class ParserTest {
 		assertEquals(expected, result);
 		
     }
+
+    final String sampleMediaPlaylist = "#EXTM3U\n" +
+			"#EXT-X-VERSION:3\n" +
+			"#EXT-X-TARGETDURATION:2\n" +
+			"#EXT-X-MEDIA-SEQUENCE:1896576\n" +
+			"#EXTINF:2.0,\n" +
+			"media_1896576.ts\n" +
+			"#EXTINF:2.0,\n" +
+			"media_1896577.ts\n" +
+			"#EXTINF:2.0,\n" +
+			"media_1896578.ts\n" +
+			"#EXTINF:2.0,\n" +
+			"media_1896579.ts";
+	//#EXTM3U
+	//#EXT-X-VERSION:3
+	//#EXT-X-TARGETDURATION:2
+	//#EXT-X-MEDIA-SEQUENCE:1896576
+	//#EXTINF:2.0,
+	//media_1896576.ts
+	//#EXTINF:2.0,
+	//media_1896577.ts
+	//#EXTINF:2.0,
+	//media_1896578.ts
+	//#EXTINF:2.0,
+	//media_1896579.ts
+
+	@Test
+	public void extractSegmentUris_ALL() {
+		DataSegment[] segments = new DataSegment[4];
+		segments[0] = (new DataSegment("2.0", "media_1896576.ts"));
+		segments[1] = (new DataSegment("2.0", "media_1896577.ts"));
+		segments[2] = (new DataSegment("2.0", "media_1896578.ts"));
+		segments[3] = (new DataSegment("2.0", "media_1896579.ts"));
+
+		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist).toArray());
+	}
+
+	@Test
+	public void extractSegmentUris_MAX() {
+		DataSegment[] segments = new DataSegment[2];
+		segments[0] = (new DataSegment("2.0", "media_1896578.ts"));
+		segments[1] = (new DataSegment("2.0", "media_1896579.ts"));
+
+		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist, 2).toArray());
+	}
+
+	@Test
+	public void extractSegmentUris_SEGMENT() {
+		DataSegment[] segments = new DataSegment[3];
+		segments[0] = (new DataSegment("2.0", "media_1896577.ts"));
+		segments[1] = (new DataSegment("2.0", "media_1896578.ts"));
+		segments[2] = (new DataSegment("2.0", "media_1896579.ts"));
+
+		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist, new DataSegment("2.0", "media_1896576.ts")).toArray());
+	}
 }
