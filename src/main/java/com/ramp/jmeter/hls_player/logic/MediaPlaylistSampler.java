@@ -323,7 +323,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     + 1 // Add \r for initial header
                     + 2; // final \r\n before data
 
-            result.setHeadersSize((int) headerBytes);
+            result.setHeadersSize(headerBytes);
             result.setSentBytes(respond.getSentBytes());
             result.setDataEncoding(respond.getContentEncoding());
         } catch (IOException e1) {
@@ -373,7 +373,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     }
 
     public String getRequestHeader(org.apache.jmeter.protocol.http.control.HeaderManager headerManager) {
-        String headerString = "";
+        StringBuilder headerStringb = new StringBuilder();
 
         if (headerManager != null) {
             CollectionProperty headers = headerManager.getHeaders();
@@ -385,13 +385,13 @@ public class MediaPlaylistSampler extends AbstractSampler {
                     if (!HTTPConstants.HEADER_CONTENT_LENGTH.equalsIgnoreCase(n)) {
                         String v = header.getValue();
                         v = v.replaceFirst(":\\d+$", "");
-                        headerString = headerString + n + ": " + v + "\n";
+                        headerStringb.append(n).append(": ").append(v).append("\n");
                     }
                 }
             }
         }
 
-        return headerString;
+        return headerStringb.toString();
     }
 
     public void setHeaderManager(HeaderManager value) {

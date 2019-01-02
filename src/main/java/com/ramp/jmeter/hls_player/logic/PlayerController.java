@@ -14,7 +14,6 @@ import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jmeter.testelement.property.TestElementProperty;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -26,10 +25,6 @@ import java.util.*;
 public class PlayerController extends GenericController {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(PlayerController.class);
-
-    public static final String CUSTOM = "CUSTOM";
-    public static final String MIN = "MIN";
-    public static final String MAX = "MAX";
 
     //Test Duration
     private long startTime;
@@ -186,7 +181,7 @@ public class PlayerController extends GenericController {
                 + 1 // Add \r for initial header
                 + 2; // final \r\n before data
 
-        masterResult.setHeadersSize((int) headerBytes);
+        masterResult.setHeadersSize(headerBytes);
         masterResult.setSentBytes(response.getSentBytes());
         masterResult.setDataEncoding(response.getContentEncoding());
 
@@ -212,7 +207,7 @@ public class PlayerController extends GenericController {
     }
 
     public String getRequestHeader(org.apache.jmeter.protocol.http.control.HeaderManager headerManager) {
-        String headerString = "";
+        StringBuilder headerStringb = new StringBuilder();
 
         if (headerManager != null) {
             CollectionProperty headers = headerManager.getHeaders();
@@ -224,13 +219,13 @@ public class PlayerController extends GenericController {
                     if (!HTTPConstants.HEADER_CONTENT_LENGTH.equalsIgnoreCase(n)) {
                         String v = header.getValue();
                         v = v.replaceFirst(":\\d+$", "");
-                        headerString = headerString + n + ": " + v + "\n";
+                        headerStringb.append(n).append(": ").append(v).append("\n");
                     }
                 }
             }
         }
 
-        return headerString;
+        return headerStringb.toString();
     }
 
     public void setHeaderManager(HeaderManager value) {
@@ -244,7 +239,7 @@ public class PlayerController extends GenericController {
                 }
             }
         }
-        setProperty(new TestElementProperty(HEADER_MANAGER, (TestElement) value));
+        setProperty(new TestElementProperty(HEADER_MANAGER, value));
     }
     public HeaderManager getHeaderManager() {
         return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
