@@ -104,15 +104,43 @@ public class Parser implements Serializable {
     }
 
 
-    public List<DataSegment> extractSegmentUris(String playlistUrl) {
-        String pattern = "EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
+    public List<DataSegment> extractSegmentUris(String playlist){
+        return extractSegmentUris(playlist, -1);
+    }
+
+    public List<DataSegment> extractSegmentUris(String playlist, int maxToExtract) {
+        String pattern = "#EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
         final List<DataSegment> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(playlistUrl);
+        String[] lines = playlist.split("(?=#EXTINF:)");
+        int lastIndex = lines.length-1;
+        for (int i = lastIndex; (i >= 0) && (maxToExtract == -1 || (lastIndex-i < maxToExtract)); i--){
+            Matcher m = r.matcher(lines[i]);
 
-        while (m.find()) {
-            DataSegment data = new DataSegment(m.group(1), m.group(3));
-            mediaList.add(data);
+            if (m.find()) {
+                DataSegment data = new DataSegment(m.group(1), m.group(3));
+                mediaList.add(0, data);
+            }
+        }
+        return mediaList;
+    }
+
+    public List<DataSegment> extractSegmentUris(String playlist, DataSegment lastExtracted) {
+        String pattern = "#EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
+        List<DataSegment> mediaList = new ArrayList<>();
+        Pattern r = Pattern.compile(pattern);
+        String[] lines = playlist.split("(?=#EXTINF:)");
+        int lastIndex = lines.length-1;
+        for (int i = lastIndex; i >= 0; i--){
+            Matcher m = r.matcher(lines[i]);
+
+            if (m.find()) {
+                DataSegment data = new DataSegment(m.group(1), m.group(3));
+                if (lastExtracted != null && data.getUri().trim().equals(lastExtracted.getUri().trim())){
+                    break;
+                }
+                mediaList.add(0, data);
+            }
         }
         return mediaList;
     }

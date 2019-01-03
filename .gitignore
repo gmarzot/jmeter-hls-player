@@ -1,5 +1,7 @@
 *.png
 *.log
 *.csv
+*.iml
 log
 target
+.idea
