@@ -178,7 +178,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
     public SampleResult sample(Entry e) {
         try {
             if (masterResponse == null) {
-                log.error("Master Playlist Missing");
+                log.warn("Master Playlist Missing");
                 nextCallTime = -1;
                 return null;
             }
@@ -191,66 +191,64 @@ public class MediaPlaylistSampler extends AbstractSampler {
                 }
             }
 
-            //log.info("sample: playlistUri: " + playlistUri + " thread: " + Thread.currentThread().getName());
+            log.debug("sample: playlistUri: " + playlistUri + " thread: " + Thread.currentThread().getName());
 
-            while (true) {
-                if (segmentsToGet.isEmpty()) {
-                    long now = System.currentTimeMillis();
-                    if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
-                        try {
-                            Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
-                        } catch (InterruptedException e1) {
-                            log.warn("sample: Thead.sleep() interupted");
-                        }
-                    }
-                    playlistResult = new SampleResult();
-                    playlistResponse = getPlaylist(playlistResult, parser);
+	    if (segmentsToGet.isEmpty()) {
+		long now = System.currentTimeMillis();
+		if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
+		    try {
+			Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
+		    } catch (InterruptedException e1) {
+			log.warn("sample: Thead.sleep() interupted");
+		    }
+		}
+		playlistResult = new SampleResult();
+		playlistResponse = getPlaylist(playlistResult, parser);
 
-                    isLive = parser.isLive(playlistResponse.getResponse());
-                    if (isLive) {
-                        log.info("sample: detected live playlist");
-                        if (isFirstSample) {
-                            log.debug("First Sample");
-                            segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), 3));
-                            isFirstSample = false;
-                        }else {
-                            log.debug("Not first sample");
-                            segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
-                        }
-                    } else {
-                        log.debug("Not live");
-                        segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
-                    }
+		isLive = parser.isLive(playlistResponse.getResponse());
+		if (isLive) {
+		    log.info("sample: detected live playlist");
+		    if (isFirstSample) {
+			log.debug("First Sample");
+			segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), 3));
+			isFirstSample = false;
+		    }else {
+			log.debug("Not first sample");
+			segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
+		    }
+		} else {
+		    log.debug("Not live");
+		    segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
+		}
 
-                    log.debug("parsed " + segmentsToGet.size() + " segmentsToGet out of playlist");
-                    lastTimeMillis = now;
+		log.debug("parsed " + segmentsToGet.size() + " segmentsToGet out of playlist");
+		lastTimeMillis = now;
 
-                    int td = parser.getTargetDuration(playlistResponse.getResponse());
-                    if (td < 0) {
-                        log.error("sample: playlist contains no target duration: \\n" + playlistResponse.getResponse());
-                    } else if (targetDuration != 0 && td != targetDuration) {
-                        log.info("sample: playlist target duration changed: " + td + " (" + targetDuration + ")");
-                    }
-                    if (td > 0) {
-                        targetDuration = td;
-                    }
+		int td = parser.getTargetDuration(playlistResponse.getResponse());
+		if (td < 0) {
+		    log.error("sample: playlist contains no target duration: \\n" + playlistResponse.getResponse());
+		} else if (targetDuration != 0 && td != targetDuration) {
+		    log.info("sample: playlist target duration changed: " + td + " (" + targetDuration + ")");
+		}
+		if (td > 0) {
+		    targetDuration = td;
+		}
 
 
-                    nextCallTime = System.currentTimeMillis();
-                    return playlistResult;
-                } else {
-                    DataSegment segment = segmentsToGet.remove(0);
-                    String durationStr = segment.getDuration();
-                    float duration = Float.parseFloat(durationStr);
-                    log.debug("segment duration: " + durationStr + " (" + duration + ")");
-                    String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
-                    SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
-                    lastExtracted = segment;
-                    nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
-                    log.debug("Next Call Time: " + nextCallTime);
-                    return segmentResult;
-                }
-            }
+		nextCallTime = System.currentTimeMillis();
+		return playlistResult;
+	    } else {
+		DataSegment segment = segmentsToGet.remove(0);
+		String durationStr = segment.getDuration();
+		float duration = Float.parseFloat(durationStr);
+		log.debug("segment duration: " + durationStr + " (" + duration + ")");
+		String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
+		SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
+		lastExtracted = segment;
+		nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
+		log.debug("Next Call Time: " + nextCallTime);
+		return segmentResult;
+	    }
         } catch (IOException e1) {
             e1.printStackTrace();
         }

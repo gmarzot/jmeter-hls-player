@@ -18,6 +18,10 @@ This plugin handles HLS playback complexity internally as an intelligent logic c
 
 After that you can add assertions, listeners, etc.
 
+### Debugging
+Set debug output in log4j2.xml:
+    <Logger name="com.ramp.jmeter" level="debug"/>
+
 ### HLS Player Properties
 The following properties can be set in the HLS Player.
 #### Video options

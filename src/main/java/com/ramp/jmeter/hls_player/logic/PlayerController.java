@@ -75,6 +75,8 @@ public class PlayerController extends GenericController {
 
     protected TestElement getCurrentElement() throws NextIsNullException {
         if (nextSamplers.size() > 0) {
+	    int sz = nextSamplers.size();
+	    log.debug("nextSamplers size:" + sz);
             lastSampler = nextSamplers.remove();
             return lastSampler;
         }
@@ -95,13 +97,16 @@ public class PlayerController extends GenericController {
         }
         if (lastSampler.getNextCallTimeMillis() > now) {
             try {
-                Thread.sleep(lastSampler.getNextCallTimeMillis() - now);
+		long sleepTime = lastSampler.getNextCallTimeMillis() - now;
+		log.debug("PlayerController sleep time: " + (float)(sleepTime/1000.0));
+                Thread.sleep(sleepTime);
             } catch (InterruptedException exception) {
                 log.warn("Player sleep interrupted");
                 this.setDone(true);
                 return null;
             }
         }
+
         return lastSampler;
     }
 
@@ -120,9 +125,12 @@ public class PlayerController extends GenericController {
                 return null;
             }
         }
-        if (lastSampler != null && lastSampler.getNextCallTimeMillis() != -1) {
+        if (lastSampler != null) {
+	    log.debug("adding lastSampler to priorityQueue");
             priorityQueue.add(lastSampler);
-        }
+        } else {
+	    log.debug("ERROR: should not occur");
+	}
         Sampler returnValue = super.next();
         if (returnValue == null) log.error("sampler was null");
         return returnValue;
