@@ -33,7 +33,7 @@ Set the playback time of the test:
 - Whole video
 - Video duration (seconds)
 
-### Media Playlsit Sampler Properties
+### Media Playlist Sampler Properties
 The following properties can be set in the Media Playlist Sampler. They should be tuned to simulate the real scenario you want to test.
 
 #### Bandwidth
@@ -52,4 +52,4 @@ After selecting the desired bandwidth you can select a resolution to simulate yo
 You can set listeners to evaluate the results of your tests (e.g., Graph Results). The View Results Tree Listener can be used to display the HLS HTTP transactions, to observe details of the requests and responses involved (debug only).
 
 ## Acknowledgement
-This plugin was initially based on the Blazemeter HLS Plugin, but has changed form considerably in this implemention. Thanks to Blazemeter for their initial work in this area.
+This plugin was initially based on the Blazemeter HLS Plugin, but has changed form considerably in this implementation. Thanks to Blazemeter for their initial work in this area.

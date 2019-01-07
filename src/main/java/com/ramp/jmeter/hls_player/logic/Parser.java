@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +47,7 @@ public class Parser implements Serializable {
         // Set request header
         result.setRequestHeaders(con.getRequestMethod() + "  " + url.toString() + "\n");
 
-	int responseCode = con.getResponseCode();
+	    int responseCode = con.getResponseCode();
 
         // Reading response from input Stream
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -74,11 +75,11 @@ public class Parser implements Serializable {
         result.setResponse(response.toString());
         result.setResponseCode(String.valueOf(responseCode));
         result.setResponseMessage(con.getResponseMessage());
-	String content_type = con.getContentType();
-	if (content_type == null || content_type.isEmpty()) {
-	    log.warn("null or emtpy content-type url: " + url.toString());
-	    content_type = "application/json;charset=UTF-8";
-	}
+        String content_type = con.getContentType();
+        if (content_type == null || content_type.isEmpty()) {
+            log.warn("null or empty content-type url: " + url.toString());
+            content_type = "application/json;charset=UTF-8";
+        }
         result.setContentType(content_type);
         result.setSuccess(isSuccessCode(responseCode));
         result.setSentBytes(sentBytes);
@@ -104,13 +105,13 @@ public class Parser implements Serializable {
     }
 
 
-    public List<DataSegment> extractSegmentUris(String playlist){
+    public List<SegmentInfo> extractSegmentUris(String playlist){
         return extractSegmentUris(playlist, -1);
     }
 
-    public List<DataSegment> extractSegmentUris(String playlist, int maxToExtract) {
+    public List<SegmentInfo> extractSegmentUris(String playlist, int maxToExtract) {
         String pattern = "#EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
-        final List<DataSegment> mediaList = new ArrayList<>();
+        final List<SegmentInfo> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
         String[] lines = playlist.split("(?=#EXTINF:)");
         int lastIndex = lines.length-1;
@@ -118,16 +119,16 @@ public class Parser implements Serializable {
             Matcher m = r.matcher(lines[i]);
 
             if (m.find()) {
-                DataSegment data = new DataSegment(m.group(1), m.group(3));
+                SegmentInfo data = new SegmentInfo(m.group(1), m.group(3));
                 mediaList.add(0, data);
             }
         }
         return mediaList;
     }
 
-    public List<DataSegment> extractSegmentUris(String playlist, DataSegment lastExtracted) {
+    public List<SegmentInfo> extractSegmentUris(String playlist, SegmentInfo lastExtracted) {
         String pattern = "#EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
-        List<DataSegment> mediaList = new ArrayList<>();
+        List<SegmentInfo> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
         String[] lines = playlist.split("(?=#EXTINF:)");
         int lastIndex = lines.length-1;
@@ -135,7 +136,7 @@ public class Parser implements Serializable {
             Matcher m = r.matcher(lines[i]);
 
             if (m.find()) {
-                DataSegment data = new DataSegment(m.group(1), m.group(3));
+                SegmentInfo data = new SegmentInfo(m.group(1), m.group(3));
                 if (lastExtracted != null && data.getUri().trim().equals(lastExtracted.getUri().trim())){
                     break;
                 }
@@ -302,4 +303,13 @@ public class Parser implements Serializable {
         return code >= 200 && code <= 399;
     }
 
+    public String HeadersToString(Map<String,List<String>> headers){
+        StringBuilder headerString = new StringBuilder();
+        for (Map.Entry<String,List<String>> entry : headers.entrySet()){
+            headerString.append(entry.getKey()).append(": ").append(entry);
+            headerString.append(String.join(", ", entry.getValue()));
+            headerString.append("\n");
+        }
+        return headerString.toString();
+    }
 }

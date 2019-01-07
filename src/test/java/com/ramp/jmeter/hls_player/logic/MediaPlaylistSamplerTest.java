@@ -3,6 +3,7 @@ package com.ramp.jmeter.hls_player.logic;
 import static org.junit.Assert.*;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +48,10 @@ public class MediaPlaylistSamplerTest {
 		DataRequest respond3 = new DataRequest();
 		DataRequest respond4 = new DataRequest();
 		DataRequest respond5 = new DataRequest();
-		DataSegment f1 = new DataSegment("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_1.ts");
-		DataSegment f2 = new DataSegment("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_2.ts");
-		DataSegment f3 = new DataSegment("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_3.ts");
-		List<DataSegment> fragments = new ArrayList<DataSegment>();
+		SegmentInfo f1 = new SegmentInfo("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_1.ts");
+		SegmentInfo f2 = new SegmentInfo("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_2.ts");
+		SegmentInfo f3 = new SegmentInfo("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_3.ts");
+		List<SegmentInfo> fragments = new ArrayList<SegmentInfo>();
 		fragments.add(f1);
 		fragments.add(f2);
 		fragments.add(f3);
@@ -151,7 +152,7 @@ public class MediaPlaylistSamplerTest {
 		assertEquals("OK", result.getResponseMessage());
 		assertEquals("playlist", result.getSampleLabel());
 		assertEquals("headerKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", result.getResponseHeaders());
-		assertEquals(new String(payload1.getBytes(), "UTF-8"), new String(result.getResponseData(), "UTF-8"));
+		assertEquals(new String(payload1.getBytes(), StandardCharsets.UTF_8), new String(result.getResponseData(), StandardCharsets.UTF_8));
 		assertEquals("200", result.getResponseCode());
 		assertEquals("application/json;charset=UTF-8", result.getContentType());
 		assertEquals("UTF-8", result.getDataEncodingNoDefault());

@@ -261,31 +261,31 @@ public class ParserTest {
 
 	@Test
 	public void extractSegmentUris_ALL() {
-		DataSegment[] segments = new DataSegment[4];
-		segments[0] = (new DataSegment("2.0", "media_1896576.ts"));
-		segments[1] = (new DataSegment("2.0", "media_1896577.ts"));
-		segments[2] = (new DataSegment("2.0", "media_1896578.ts"));
-		segments[3] = (new DataSegment("2.0", "media_1896579.ts"));
+		SegmentInfo[] segments = new SegmentInfo[4];
+		segments[0] = (new SegmentInfo("2.0", "media_1896576.ts"));
+		segments[1] = (new SegmentInfo("2.0", "media_1896577.ts"));
+		segments[2] = (new SegmentInfo("2.0", "media_1896578.ts"));
+		segments[3] = (new SegmentInfo("2.0", "media_1896579.ts"));
 
 		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist).toArray());
 	}
 
 	@Test
 	public void extractSegmentUris_MAX() {
-		DataSegment[] segments = new DataSegment[2];
-		segments[0] = (new DataSegment("2.0", "media_1896578.ts"));
-		segments[1] = (new DataSegment("2.0", "media_1896579.ts"));
+		SegmentInfo[] segments = new SegmentInfo[2];
+		segments[0] = (new SegmentInfo("2.0", "media_1896578.ts"));
+		segments[1] = (new SegmentInfo("2.0", "media_1896579.ts"));
 
 		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist, 2).toArray());
 	}
 
 	@Test
 	public void extractSegmentUris_SEGMENT() {
-		DataSegment[] segments = new DataSegment[3];
-		segments[0] = (new DataSegment("2.0", "media_1896577.ts"));
-		segments[1] = (new DataSegment("2.0", "media_1896578.ts"));
-		segments[2] = (new DataSegment("2.0", "media_1896579.ts"));
+		SegmentInfo[] segments = new SegmentInfo[3];
+		segments[0] = (new SegmentInfo("2.0", "media_1896577.ts"));
+		segments[1] = (new SegmentInfo("2.0", "media_1896578.ts"));
+		segments[2] = (new SegmentInfo("2.0", "media_1896579.ts"));
 
-		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist, new DataSegment("2.0", "media_1896576.ts")).toArray());
+		Assert.assertArrayEquals(segments, p.extractSegmentUris(sampleMediaPlaylist, new SegmentInfo("2.0", "media_1896576.ts")).toArray());
 	}
 }

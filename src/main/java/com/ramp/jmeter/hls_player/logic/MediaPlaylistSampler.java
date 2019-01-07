@@ -3,6 +3,7 @@ package com.ramp.jmeter.hls_player.logic;
 import org.apache.jmeter.protocol.http.control.CacheManager;
 import org.apache.jmeter.protocol.http.control.CookieManager;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.protocol.http.util.HTTPConstants;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -67,8 +69,8 @@ public class MediaPlaylistSampler extends AbstractSampler {
 
     private long nextCallTime = 0;
 
-    private List<DataSegment> segmentsToGet = new ArrayList<>();
-    private DataSegment lastExtracted = null;
+    private List<SegmentInfo> segmentsToGet = new ArrayList<>();
+    private SegmentInfo lastExtracted = null;
 
     public MediaPlaylistSampler() {
         super();
@@ -199,7 +201,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
 		    try {
 			Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
 		    } catch (InterruptedException e1) {
-			log.warn("sample: Thead.sleep() interupted");
+			log.warn("sample: Thead.sleep() interrupted");
 		    }
 		}
 		playlistResult = new SampleResult();
@@ -238,7 +240,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
 		nextCallTime = System.currentTimeMillis();
 		return playlistResult;
 	    } else {
-		DataSegment segment = segmentsToGet.remove(0);
+		SegmentInfo segment = segmentsToGet.remove(0);
 		String durationStr = segment.getDuration();
 		float duration = Float.parseFloat(durationStr);
 		log.debug("segment duration: " + durationStr + " (" + duration + ")");
@@ -290,59 +292,79 @@ public class MediaPlaylistSampler extends AbstractSampler {
         this.setProperty(BANDWIDTH_OPTION, type);
     }
 
-    public SampleResult getSegment(Parser parser, DataSegment seg, String url) {
-        SampleResult result = new SampleResult();
+    public SampleResult getSegment(Parser parser, SegmentInfo segmentInfo, String url) {
+        HTTPSampleResult sampleResult = new HTTPSampleResult();
 
-        String uriString = seg.getUri();
+        String uriString = segmentInfo.getUri();
         // log.info("url: " + (url != null ? url : "<null>") + " uriString: " + uriString);
         if ((url != null) && (!uriString.startsWith("http"))) {
             uriString = url + uriString;
         }
 
-        result.sampleStart();
+        sampleResult.sampleStart();
 
         try {
-            DataRequest respond = parser.getBaseUrl(new URL(uriString), result, false);
+            // Fetch Segment
+            //DataRequest respond = parser.getBaseUrl(new URL(uriString), result, false);
 
-            result.sampleEnd();
+            // Set the URL
+            URL httpURL = new URL(uriString);
 
-            result.setRequestHeaders(respond.getRequestHeaders() + "\n\n" + getCookieHeader(uriString) + "\n\n"
-                    + getRequestHeader(this.getHeaderManager()));
-            result.setSuccessful(respond.isSuccess());
-            result.setResponseMessage(respond.getResponseMessage());
+            // Create the connection object
+            HttpURLConnection connection = (HttpURLConnection) httpURL.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+
+            // manually open and close the connection
+            connection.connect();
+            connection.disconnect();
+
+            // Record the end time of a sample and calculate the elapsed time
+            sampleResult.sampleEnd();
+
+            // Set Sample label
             switch (this.getMediaPlaylistType()) {
                 case TYPE_VIDEO:
-                    result.setSampleLabel("video_segment");
+                    sampleResult.setSampleLabel("video_segment");
                     break;
                 case TYPE_AUDIO:
-                    result.setSampleLabel("audio_segment");
+                    sampleResult.setSampleLabel("audio_segment");
                     break;
                 case TYPE_SUBTITLES:
-                    result.setSampleLabel("subtitle_segment");
+                    sampleResult.setSampleLabel("subtitle_segment");
                     break;
                 default:
                     log.error("Unknown media type");
             }
-            result.setResponseHeaders("URL: " + uriString + "\n" + respond.getHeadersAsString());
-            result.setResponseCode(respond.getResponseCode());
-            result.setContentType(respond.getContentType());
-            result.setBytes(result.getBytesAsLong() + (long) result.getRequestHeaders().length());
-            int headerBytes = result.getResponseHeaders().length() // condensed length (without \r)
-                    + respond.getHeaders().size() // Add \r for each header
-                    + 1 // Add \r for initial header
-                    + 2; // final \r\n before data
 
-            result.setHeadersSize(headerBytes);
-            result.setSentBytes(respond.getSentBytes());
-            result.setDataEncoding(respond.getContentEncoding());
+            // Set Request Data
+            String requestHeaderString = parser.HeadersToString(connection.getRequestProperties());
+            sampleResult.setRequestHeaders(requestHeaderString);
+            sampleResult.setSentBytes(requestHeaderString.length());
+
+            // Set Response Data
+            sampleResult.setResponseCode(Integer.toString(connection.getResponseCode()));
+            String responseHeaderString = parser.HeadersToString(connection.getHeaderFields());
+            sampleResult.setResponseHeaders(responseHeaderString);
+            sampleResult.setResponseMessage(connection.getResponseMessage());
+            sampleResult.setContentType(connection.getContentType());
+            sampleResult.setHeadersSize(responseHeaderString.length());
+            sampleResult.setDataEncoding(connection.getContentEncoding());
+            // TODO: verify this calculation for total bytes received (complete http response including headers)
+            sampleResult.setBytes(connection.getContentLengthLong() + sampleResult.getHeadersSize());
+
+            // Set SampleResult Metadata
+            sampleResult.setSuccessful(connection.getResponseCode() >= 200
+                    && connection.getResponseCode() < 300);
+
         } catch (IOException e1) {
             e1.printStackTrace();
-            result.sampleEnd();
-            result.setSuccessful(false);
-            result.setResponseMessage("Exception: " + e1);
+            sampleResult.sampleEnd();
+            sampleResult.setSuccessful(false);
+            sampleResult.setResponseMessage("Exception: " + e1);
         }
 
-        return result;
+        return sampleResult;
     }
 
     // private method to allow AsyncSample to reset the value without performing
