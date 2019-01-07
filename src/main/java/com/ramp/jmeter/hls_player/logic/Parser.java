@@ -306,7 +306,7 @@ public class Parser implements Serializable {
     public String HeadersToString(Map<String,List<String>> headers){
         StringBuilder headerString = new StringBuilder();
         for (Map.Entry<String,List<String>> entry : headers.entrySet()){
-            headerString.append(entry.getKey()).append(": ").append(entry);
+            headerString.append(entry.getKey()).append(": ");
             headerString.append(String.join(", ", entry.getValue()));
             headerString.append("\n");
         }

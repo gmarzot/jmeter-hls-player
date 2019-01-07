@@ -16,7 +16,7 @@ import org.apache.jmeter.testelement.property.TestElementProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -315,8 +315,17 @@ public class MediaPlaylistSampler extends AbstractSampler {
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);
 
+            // Get the request Headers
+            String requestHeaderString = parser.HeadersToString(connection.getRequestProperties());
+
             // manually open and close the connection
             connection.connect();
+            sampleResult.connectEnd();
+
+            InputStream in = connection.getInputStream();
+            byte[] responseData = in.readAllBytes();
+            in.close();
+
             connection.disconnect();
 
             // Record the end time of a sample and calculate the elapsed time
@@ -338,18 +347,18 @@ public class MediaPlaylistSampler extends AbstractSampler {
             }
 
             // Set Request Data
-            String requestHeaderString = parser.HeadersToString(connection.getRequestProperties());
             sampleResult.setRequestHeaders(requestHeaderString);
-            sampleResult.setSentBytes(requestHeaderString.length());
+            sampleResult.setSentBytes(requestHeaderString.getBytes().length);
 
             // Set Response Data
             sampleResult.setResponseCode(Integer.toString(connection.getResponseCode()));
             String responseHeaderString = parser.HeadersToString(connection.getHeaderFields());
             sampleResult.setResponseHeaders(responseHeaderString);
+            sampleResult.setDataEncoding(connection.getContentEncoding());
+            sampleResult.setResponseData(responseData);
             sampleResult.setResponseMessage(connection.getResponseMessage());
             sampleResult.setContentType(connection.getContentType());
-            sampleResult.setHeadersSize(responseHeaderString.length());
-            sampleResult.setDataEncoding(connection.getContentEncoding());
+            sampleResult.setHeadersSize(responseHeaderString.getBytes().length);
             // TODO: verify this calculation for total bytes received (complete http response including headers)
             sampleResult.setBytes(connection.getContentLengthLong() + sampleResult.getHeadersSize());
 
