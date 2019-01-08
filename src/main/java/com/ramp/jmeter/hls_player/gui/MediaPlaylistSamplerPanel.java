@@ -3,7 +3,6 @@ package com.ramp.jmeter.hls_player.gui;
 import com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler;
 
 import javax.swing.*;
-
 import java.awt.event.ItemEvent;
 
 public class MediaPlaylistSamplerPanel extends JPanel {
@@ -38,7 +37,7 @@ public class MediaPlaylistSamplerPanel extends JPanel {
 
     private JRadioButton rDefaultCC = new JRadioButton("Default");
     private JRadioButton rCustomCC = new JRadioButton("Custom: ");
-    
+
     private ButtonGroup resolGroup = new ButtonGroup();
     private ButtonGroup bandGroup = new ButtonGroup();
     private ButtonGroup audioGroup = new ButtonGroup();
@@ -124,7 +123,8 @@ public class MediaPlaylistSamplerPanel extends JPanel {
                 }
         );
     }
-    void setupLayouts(){
+
+    void setupLayouts() {
         bandwidthOptions.setBorder(BorderFactory.createTitledBorder("Bandwidth Options"));
         GroupLayout bandwidthOptionsLayout = new javax.swing.GroupLayout(bandwidthOptions);
         bandwidthOptionsLayout.setAutoCreateContainerGaps(true);
@@ -234,12 +234,12 @@ public class MediaPlaylistSamplerPanel extends JPanel {
                 videoStreamSelectionLayout.createSequentialGroup()
                         .addComponent(bandwidthOptions)
                         .addComponent(resolutionOptions)
-                );
+        );
         videoStreamSelectionLayout.setVerticalGroup(
                 videoStreamSelectionLayout.createParallelGroup()
                         .addComponent(bandwidthOptions)
                         .addComponent(resolutionOptions)
-                );
+        );
 
 
         this.setBorder(BorderFactory.createTitledBorder("Media Playlist"));
@@ -266,12 +266,11 @@ public class MediaPlaylistSamplerPanel extends JPanel {
     }
 
 
-
-    String getMediaPlaylistType(){
-        return (String)mediaPlaylistTypeCBox.getSelectedItem();
+    String getMediaPlaylistType() {
+        return (String) mediaPlaylistTypeCBox.getSelectedItem();
     }
 
-    void setMediaPlaylistType(String type){
+    void setMediaPlaylistType(String type) {
         mediaPlaylistTypeCBox.setSelectedItem(type);
     }
 
@@ -336,7 +335,7 @@ public class MediaPlaylistSamplerPanel extends JPanel {
         return rDefaultAudio.isSelected();
     }
 
-    public String getCustomAudio(){
+    public String getCustomAudio() {
         return audioField.getText();
     }
 
@@ -344,7 +343,7 @@ public class MediaPlaylistSamplerPanel extends JPanel {
         return rDefaultCC.isSelected();
     }
 
-    public String getCustomCC(){
+    public String getCustomCC() {
         return CCField.getText();
     }
 

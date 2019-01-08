@@ -6,15 +6,14 @@ import java.awt.event.ItemEvent;
 public class MasterPlaylistPanel extends JPanel {
     //Master Playlist Panel
     JLabel urlTextFieldLabel = new JLabel("URL:");
-    JTextField urlTextField= new JTextField();
+    JTextField urlTextField = new JTextField();
     ButtonGroup durationButtons = new ButtonGroup();
     JRadioButton wholeDurationRButton = new JRadioButton("Whole Duration", true);
     JRadioButton customDurationRButton = new JRadioButton("Custom Duration", false);
-    JTextField customDurationTextField= new JTextField();
+    JTextField customDurationTextField = new JTextField();
 
 
-
-    public MasterPlaylistPanel(){
+    public MasterPlaylistPanel() {
         //Buttons
         durationButtons.add(wholeDurationRButton);
         durationButtons.add(customDurationRButton);

@@ -13,13 +13,14 @@ import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jmeter.testelement.property.TestElementProperty;
-
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 
 public class PlayerController extends GenericController {
@@ -45,12 +46,11 @@ public class PlayerController extends GenericController {
     }
 
 
-
     @Override
     public void initialize() {
         log.debug("initialize");
         parser = new Parser();
-        DataRequest masterResponse = tryGetMasterList();
+        RequestInfo masterResponse = tryGetMasterList();
 
 
         priorityQueue = new PriorityQueue<>(new MediaPlaylistSamplerComparator());
@@ -75,8 +75,8 @@ public class PlayerController extends GenericController {
 
     protected TestElement getCurrentElement() throws NextIsNullException {
         if (nextSamplers.size() > 0) {
-	    int sz = nextSamplers.size();
-	    log.debug("nextSamplers size:" + sz);
+            int sz = nextSamplers.size();
+            log.debug("nextSamplers size:" + sz);
             lastSampler = nextSamplers.remove();
             return lastSampler;
         }
@@ -92,13 +92,13 @@ public class PlayerController extends GenericController {
         while (priorityQueue.size() > 0
                 && (priorityQueue.comparator().compare(lastSampler, priorityQueue.peek()) == 0
                 || priorityQueue.peek().getNextCallTimeMillis() < now)
-                ) {
+        ) {
             nextSamplers.add(priorityQueue.remove());
         }
         if (lastSampler.getNextCallTimeMillis() > now) {
             try {
-		long sleepTime = lastSampler.getNextCallTimeMillis() - now;
-		log.debug("PlayerController sleep time: " + (float)(sleepTime/1000.0));
+                long sleepTime = lastSampler.getNextCallTimeMillis() - now;
+                log.debug("PlayerController sleep time: " + (float) (sleepTime / 1000.0));
                 Thread.sleep(sleepTime);
             } catch (InterruptedException exception) {
                 log.warn("Player sleep interrupted");
@@ -125,12 +125,12 @@ public class PlayerController extends GenericController {
                 return null;
             }
         }
-        if (lastSampler != null) {
-	    log.debug("adding lastSampler to priorityQueue");
+        if (lastSampler != null && lastSampler.getNextCallTimeMillis() != -1) {
+            log.debug("adding lastSampler to priorityQueue");
             priorityQueue.add(lastSampler);
         } else {
-	    log.debug("ERROR: should not occur");
-	}
+            log.debug("ERROR: should not occur");
+        }
         Sampler returnValue = super.next();
         if (returnValue == null) log.error("sampler was null");
         return returnValue;
@@ -154,20 +154,20 @@ public class PlayerController extends GenericController {
 
     private Parser parser;
 
-    public DataRequest tryGetMasterList() {
+    public RequestInfo tryGetMasterList() {
         try {
             SampleResult masterResult = new SampleResult();
             return getMasterList(masterResult, parser);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
-    private DataRequest getMasterList(SampleResult masterResult, Parser parser) throws IOException {
+    private RequestInfo getMasterList(SampleResult masterResult, Parser parser) throws IOException {
 
         masterResult.sampleStart();
-        DataRequest response = parser.getBaseUrl(new URL(getURLData()), masterResult, true);
+        RequestInfo response = parser.getBaseUrl(new URL(getURLData()), masterResult, true);
         masterResult.sampleEnd();
 
         masterResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(getURLData()) + "\n\n"
@@ -210,6 +210,7 @@ public class PlayerController extends GenericController {
     private void setCacheManagerProperty(CacheManager value) {
         setProperty(new TestElementProperty(CACHE_MANAGER, value));
     }
+
     public CacheManager getCacheManager() {
         return (CacheManager) getProperty(CACHE_MANAGER).getObjectValue();
     }
@@ -249,6 +250,7 @@ public class PlayerController extends GenericController {
         }
         setProperty(new TestElementProperty(HEADER_MANAGER, value));
     }
+
     public HeaderManager getHeaderManager() {
         return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
     }
@@ -260,6 +262,7 @@ public class PlayerController extends GenericController {
         }
         setCookieManagerProperty(value);
     }
+
     // private method to allow AsyncSample to reset the value without performing
     // checks
     private void setCookieManagerProperty(CookieManager value) {
@@ -269,6 +272,7 @@ public class PlayerController extends GenericController {
     public CookieManager getCookieManager() {
         return (CookieManager) getProperty(COOKIE_MANAGER).getObjectValue();
     }
+
     public String getCookieHeader(String urlData) throws MalformedURLException {
         String headerString = "";
 
@@ -288,7 +292,6 @@ public class PlayerController extends GenericController {
     private String getURLData() {
         return this.getPropertyAsString(MASTER_PLAYLIST_URL);
     }
-
 
 
 }
