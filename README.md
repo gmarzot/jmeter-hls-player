@@ -51,5 +51,8 @@ After selecting the desired bandwidth you can select a resolution to simulate yo
 ## Results
 You can set listeners to evaluate the results of your tests (e.g., Graph Results). The View Results Tree Listener can be used to display the HLS HTTP transactions, to observe details of the requests and responses involved (debug only).
 
+### NOTE:
+set http.maxConnections=1000 in system.properties for jmeter for simulating large number of users
+
 ## Acknowledgement
 This plugin was initially based on the Blazemeter HLS Plugin, but has changed form considerably in this implementation. Thanks to Blazemeter for their initial work in this area.
