@@ -3,7 +3,6 @@ package com.ramp.jmeter.hls_player.gui;
 import com.ramp.jmeter.hls_player.logic.PlayerController;
 import org.apache.jmeter.control.gui.AbstractControllerGui;
 import org.apache.jmeter.testelement.TestElement;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,7 @@ public class PlayerControllerGui extends AbstractControllerGui {
 
     private MasterPlaylistPanel masterPlaylistPanel;
 
-    public PlayerControllerGui(){
+    public PlayerControllerGui() {
         super();
         masterPlaylistPanel = new MasterPlaylistPanel();
         setLayout(new BorderLayout(0, 5));
@@ -43,7 +42,7 @@ public class PlayerControllerGui extends AbstractControllerGui {
     }
 
     @Override
-    public void configure(TestElement testElement){
+    public void configure(TestElement testElement) {
         super.configure(testElement);
         PlayerController playerController = (PlayerController) testElement;
         //Master Playlist Setup

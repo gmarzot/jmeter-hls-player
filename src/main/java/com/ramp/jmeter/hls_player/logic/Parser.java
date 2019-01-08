@@ -1,11 +1,13 @@
 package com.ramp.jmeter.hls_player.logic;
 
 import org.apache.jmeter.samplers.SampleResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,9 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.apache.http.protocol.HTTP.USER_AGENT;
 
@@ -26,9 +25,9 @@ public class Parser implements Serializable {
     }
 
     // HTTP GET request
-    public DataRequest getBaseUrl(URL url, SampleResult sampleResult, boolean setRequest) throws IOException {
+    public RequestInfo getBaseUrl(URL url, SampleResult sampleResult, boolean setRequest) throws IOException {
         HttpURLConnection con = null;
-        DataRequest result = new DataRequest();
+        RequestInfo result = new RequestInfo();
         boolean first = true;
         long sentBytes = 0;
 
@@ -47,7 +46,7 @@ public class Parser implements Serializable {
         // Set request header
         result.setRequestHeaders(con.getRequestMethod() + "  " + url.toString() + "\n");
 
-	    int responseCode = con.getResponseCode();
+        int responseCode = con.getResponseCode();
 
         // Reading response from input Stream
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -105,7 +104,7 @@ public class Parser implements Serializable {
     }
 
 
-    public List<SegmentInfo> extractSegmentUris(String playlist){
+    public List<SegmentInfo> extractSegmentUris(String playlist) {
         return extractSegmentUris(playlist, -1);
     }
 
@@ -114,8 +113,8 @@ public class Parser implements Serializable {
         final List<SegmentInfo> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
         String[] lines = playlist.split("(?=#EXTINF:)");
-        int lastIndex = lines.length-1;
-        for (int i = lastIndex; (i >= 0) && (maxToExtract == -1 || (lastIndex-i < maxToExtract)); i--){
+        int lastIndex = lines.length - 1;
+        for (int i = lastIndex; (i >= 0) && (maxToExtract == -1 || (lastIndex - i < maxToExtract)); i--) {
             Matcher m = r.matcher(lines[i]);
 
             if (m.find()) {
@@ -131,13 +130,13 @@ public class Parser implements Serializable {
         List<SegmentInfo> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
         String[] lines = playlist.split("(?=#EXTINF:)");
-        int lastIndex = lines.length-1;
-        for (int i = lastIndex; i >= 0; i--){
+        int lastIndex = lines.length - 1;
+        for (int i = lastIndex; i >= 0; i--) {
             Matcher m = r.matcher(lines[i]);
 
             if (m.find()) {
                 SegmentInfo data = new SegmentInfo(m.group(1), m.group(3));
-                if (lastExtracted != null && data.getUri().trim().equals(lastExtracted.getUri().trim())){
+                if (lastExtracted != null && data.getUri().trim().equals(lastExtracted.getUri().trim())) {
                     break;
                 }
                 mediaList.add(0, data);
@@ -231,9 +230,9 @@ public class Parser implements Serializable {
         Pattern b = Pattern.compile(bandwidthPattern);
         Pattern r = Pattern.compile(resolutionPattern);
 
-	String playlist_entry = "<null>";
+        String playlist_entry = "<null>";
         while (m.find()) {
-	    playlist_entry = m.group(1);
+            playlist_entry = m.group(1);
             Matcher mr = r.matcher(playlist_entry);
             boolean rfound = mr.find();
             Matcher mb = b.matcher(playlist_entry);
@@ -275,8 +274,8 @@ public class Parser implements Serializable {
 
         }
 
-	log.info("getVideoUri selected playlist entry: " + playlist_entry);
-	log.info("getVideoUri return: " + uri);
+        log.info("getVideoUri selected playlist entry: " + playlist_entry);
+        log.info("getVideoUri return: " + uri);
         return uri;
     }
 
@@ -303,9 +302,9 @@ public class Parser implements Serializable {
         return code >= 200 && code <= 399;
     }
 
-    public String HeadersToString(Map<String,List<String>> headers){
+    public String HeadersToString(Map<String, List<String>> headers) {
         StringBuilder headerString = new StringBuilder();
-        for (Map.Entry<String,List<String>> entry : headers.entrySet()){
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             headerString.append(entry.getKey()).append(": ");
             headerString.append(String.join(", ", entry.getValue()));
             headerString.append("\n");

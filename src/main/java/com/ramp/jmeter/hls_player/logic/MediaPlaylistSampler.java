@@ -7,25 +7,24 @@ import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.protocol.http.util.HTTPConstants;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.Interruptible;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jmeter.testelement.property.TestElementProperty;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.Float;
-import java.lang.Thread;
 
-public class MediaPlaylistSampler extends AbstractSampler {
+public class MediaPlaylistSampler extends AbstractSampler implements Interruptible {
     public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
     public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
     public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
@@ -54,11 +53,11 @@ public class MediaPlaylistSampler extends AbstractSampler {
     private Parser parser;
 
 
-    private DataRequest masterResponse = null;
+    private RequestInfo masterResponse = null;
 
     private String playlistUri = null;
 
-    private DataRequest playlistResponse = null;
+    private RequestInfo playlistResponse = null;
     private SampleResult playlistResult = null;
 
     private boolean isLive = false; // does not have an end tag
@@ -82,7 +81,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
         return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
     }
 
-    void setPlaylistUri(DataRequest request) {
+    void setPlaylistUri(RequestInfo request) {
         try {
             playlistUri = getPlaylistUri(request, parser);
         } catch (MalformedURLException ex) {
@@ -90,10 +89,10 @@ public class MediaPlaylistSampler extends AbstractSampler {
         }
     }
 
-    private String getPlaylistUri(DataRequest respond, Parser parser) throws MalformedURLException {
+    private String getPlaylistUri(RequestInfo respond, Parser parser) throws MalformedURLException {
         URL masterURL = new URL(respond.url);
         String basePath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
-        log.info("extracting "+this.getMediaPlaylistType()+" playlist uri from master playlist("+respond.url+") baseurl("+basePath+")");
+        log.info("extracting " + this.getMediaPlaylistType() + " playlist uri from master playlist(" + respond.url + ") baseurl(" + basePath + ")");
         String playlistUri = null;
         switch (this.getMediaPlaylistType()) {
             case "Video":
@@ -114,7 +113,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
 
         if (playlistUri == null) {
             log.warn("Unable to select playlist, testing if media playlist supplied.");
-            if(!respond.getResponse().contains("#EXTINF")){
+            if (!respond.getResponse().contains("#EXTINF")) {
                 log.error("The playlist is neither master or media");
                 return null;
             }
@@ -144,10 +143,10 @@ public class MediaPlaylistSampler extends AbstractSampler {
         return this.getPropertyAsString(MEDIA_PLAYLIST_TYPE);
     }
 
-    private DataRequest getPlaylist(SampleResult playListResult, Parser parser) throws IOException {
+    private RequestInfo getPlaylist(SampleResult playListResult, Parser parser) throws IOException {
 
         playListResult.sampleStart();
-        DataRequest response = parser.getBaseUrl(new URL(playlistUri), playListResult, true);
+        RequestInfo response = parser.getBaseUrl(new URL(playlistUri), playListResult, true);
         playListResult.sampleEnd();
 
         playListResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(playlistUri) + "\n\n"
@@ -195,62 +194,62 @@ public class MediaPlaylistSampler extends AbstractSampler {
 
             log.debug("sample: playlistUri: " + playlistUri + " thread: " + Thread.currentThread().getName());
 
-	    if (segmentsToGet.isEmpty()) {
-		long now = System.currentTimeMillis();
-		if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
-		    try {
-			Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
-		    } catch (InterruptedException e1) {
-			log.warn("sample: Thead.sleep() interrupted");
-		    }
-		}
-		playlistResult = new SampleResult();
-		playlistResponse = getPlaylist(playlistResult, parser);
+            if (segmentsToGet.isEmpty()) {
+                long now = System.currentTimeMillis();
+                if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
+                    try {
+                        Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
+                    } catch (InterruptedException e1) {
+                        log.warn("sample: Thead.sleep() interrupted");
+                    }
+                }
+                playlistResult = new SampleResult();
+                playlistResponse = getPlaylist(playlistResult, parser);
 
-		isLive = parser.isLive(playlistResponse.getResponse());
-		if (isLive) {
-		    log.info("sample: detected live playlist");
-		    if (isFirstSample) {
-			log.debug("First Sample");
-			segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), 3));
-			isFirstSample = false;
-		    }else {
-			log.debug("Not first sample");
-			segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
-		    }
-		} else {
-		    log.debug("Not live");
-		    segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
-		}
+                isLive = parser.isLive(playlistResponse.getResponse());
+                if (isLive) {
+                    log.info("sample: detected live playlist");
+                    if (isFirstSample) {
+                        log.debug("First Sample");
+                        segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), 3));
+                        isFirstSample = false;
+                    } else {
+                        log.debug("Not first sample");
+                        segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
+                    }
+                } else {
+                    log.debug("Not live");
+                    segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
+                }
 
-		log.debug("parsed " + segmentsToGet.size() + " segmentsToGet out of playlist");
-		lastTimeMillis = now;
+                log.debug("parsed " + segmentsToGet.size() + " segmentsToGet out of playlist");
+                lastTimeMillis = now;
 
-		int td = parser.getTargetDuration(playlistResponse.getResponse());
-		if (td < 0) {
-		    log.error("sample: playlist contains no target duration: \\n" + playlistResponse.getResponse());
-		} else if (targetDuration != 0 && td != targetDuration) {
-		    log.info("sample: playlist target duration changed: " + td + " (" + targetDuration + ")");
-		}
-		if (td > 0) {
-		    targetDuration = td;
-		}
+                int td = parser.getTargetDuration(playlistResponse.getResponse());
+                if (td < 0) {
+                    log.error("sample: playlist contains no target duration: \\n" + playlistResponse.getResponse());
+                } else if (targetDuration != 0 && td != targetDuration) {
+                    log.info("sample: playlist target duration changed: " + td + " (" + targetDuration + ")");
+                }
+                if (td > 0) {
+                    targetDuration = td;
+                }
 
 
-		nextCallTime = System.currentTimeMillis();
-		return playlistResult;
-	    } else {
-		SegmentInfo segment = segmentsToGet.remove(0);
-		String durationStr = segment.getDuration();
-		float duration = Float.parseFloat(durationStr);
-		log.debug("segment duration: " + durationStr + " (" + duration + ")");
-		String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
-		SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
-		lastExtracted = segment;
-		nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
-		log.debug("Next Call Time: " + nextCallTime);
-		return segmentResult;
-	    }
+                nextCallTime = System.currentTimeMillis();
+                return playlistResult;
+            } else {
+                SegmentInfo segment = segmentsToGet.remove(0);
+                String durationStr = segment.getDuration();
+                float duration = Float.parseFloat(durationStr);
+                log.debug("segment duration: " + durationStr + " (" + duration + ")");
+                String segmentBaseUri = playlistUri.substring(0, playlistUri.lastIndexOf('/') + 1);
+                SampleResult segmentResult = getSegment(parser, segment, segmentBaseUri);
+                lastExtracted = segment;
+                nextCallTime = System.currentTimeMillis() + ((long) (duration * 1000)) - segmentResult.getTime();
+                log.debug("Next Call Time: " + nextCallTime);
+                return segmentResult;
+            }
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -300,33 +299,36 @@ public class MediaPlaylistSampler extends AbstractSampler {
         if ((url != null) && (!uriString.startsWith("http"))) {
             uriString = url + uriString;
         }
-
-        sampleResult.sampleStart();
+        log.debug("Calculated segment URI: %s, thread: %s", uriString, getThreadName());
 
         try {
             // Fetch Segment
-            //DataRequest respond = parser.getBaseUrl(new URL(uriString), result, false);
+            //RequestInfo respond = parser.getBaseUrl(new URL(uriString), result, false);
 
-            // Set the URL
+            // Create URL object
             URL httpURL = new URL(uriString);
 
             // Create the connection object
             HttpURLConnection connection = (HttpURLConnection) httpURL.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);
+            connection.setInstanceFollowRedirects(true);
 
             // Get the request Headers
             String requestHeaderString = parser.HeadersToString(connection.getRequestProperties());
 
-            // manually open and close the connection
+            // Start recording sample
+            sampleResult.sampleStart();
+
+            // manually open the connection
             connection.connect();
             sampleResult.connectEnd();
 
+            // Read in the segment data
             InputStream in = connection.getInputStream();
+            sampleResult.latencyEnd();
             byte[] responseData = in.readAllBytes();
             in.close();
-
-            connection.disconnect();
 
             // Record the end time of a sample and calculate the elapsed time
             sampleResult.sampleEnd();
@@ -347,6 +349,8 @@ public class MediaPlaylistSampler extends AbstractSampler {
             }
 
             // Set Request Data
+            sampleResult.setURL(httpURL);
+            sampleResult.setHTTPMethod(connection.getRequestMethod());
             sampleResult.setRequestHeaders(requestHeaderString);
             sampleResult.setSentBytes(requestHeaderString.getBytes().length);
 
@@ -355,7 +359,7 @@ public class MediaPlaylistSampler extends AbstractSampler {
             String responseHeaderString = parser.HeadersToString(connection.getHeaderFields());
             sampleResult.setResponseHeaders(responseHeaderString);
             sampleResult.setDataEncoding(connection.getContentEncoding());
-            sampleResult.setResponseData(responseData);
+            //sampleResult.setResponseData(responseData);
             sampleResult.setResponseMessage(connection.getResponseMessage());
             sampleResult.setContentType(connection.getContentType());
             sampleResult.setHeadersSize(responseHeaderString.getBytes().length);
@@ -485,7 +489,13 @@ public class MediaPlaylistSampler extends AbstractSampler {
         return nextCallTime;
     }
 
-    public void setMasterPlaylist(DataRequest masterResponse) {
+    public void setMasterPlaylist(RequestInfo masterResponse) {
         this.masterResponse = masterResponse;
+    }
+
+    @Override
+    public boolean interrupt() {
+
+        return false;
     }
 }
