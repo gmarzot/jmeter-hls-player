@@ -209,13 +209,13 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
 
                 isLive = parser.isLive(playlistResponse.getResponse());
                 if (isLive) {
-                    log.info("sample: detected live playlist");
+                    log.debug("sample: detected live playlist");
                     if (isFirstSample) {
-                        log.debug("First Sample");
+                        log.debug("sample: first live playlist: adding 3 segments");
                         segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), 3));
                         isFirstSample = false;
                     } else {
-                        log.debug("Not first sample");
+                        log.debug("sample: live playlist: lastExtracted: " + lastExtracted);
                         segmentsToGet.addAll(parser.extractSegmentUris(playlistResponse.getResponse(), lastExtracted));
                     }
                 } else {
