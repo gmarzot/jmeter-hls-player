@@ -196,9 +196,10 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
 
             if (segmentsToGet.isEmpty()) {
                 long now = System.currentTimeMillis();
-                if ((targetDuration > 0) && now < (lastTimeMillis + (targetDuration * 500))) {
+		long nextPlaylistGetTime = lastTimeMillis + (targetDuration * 500);
+                if ((targetDuration > 0) && now < nextPlaylistGetTime) {
                     try {
-                        Thread.sleep(now - (targetDuration * 500)); // only get playlist every TD/2 seconds
+                        Thread.sleep(now - nextPlaylistGetTime); // only get playlist every TD/2 seconds
                     } catch (InterruptedException e1) {
                         log.warn("sample: Thead.sleep() interrupted");
                     }
@@ -254,7 +255,7 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
             e1.printStackTrace();
         }
         log.warn("Sampler returning null!");
-        nextCallTime = -1;
+        nextCallTime = System.currentTimeMillis();
         return null;
     }
 
