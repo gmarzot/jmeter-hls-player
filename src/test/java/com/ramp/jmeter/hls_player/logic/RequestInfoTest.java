@@ -1,6 +1,5 @@
 package com.ramp.jmeter.hls_player.logic;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,19 +12,14 @@ import static org.junit.Assert.assertEquals;
 
 public class RequestInfoTest {
 
-    @BeforeClass
-    public static void setUpClass()
-            throws Exception {
-    }
-
     @Test
     public void testHeaders() {
 
         RequestInfo dt = new RequestInfo();
-        Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        List<String> header1 = new ArrayList<String>();
-        List<String> header2 = new ArrayList<String>();
-        List<String> header3 = new ArrayList<String>();
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> header1 = new ArrayList<>();
+        List<String> header2 = new ArrayList<>();
+        List<String> header3 = new ArrayList<>();
 
         header1.add("header11");
         header1.add("header12");

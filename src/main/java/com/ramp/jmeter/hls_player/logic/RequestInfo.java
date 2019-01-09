@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RequestInfo {
-    public String url;
-    public Map<String, List<String>> headers;
+    private String url;
+    private Map<String, List<String>> headers;
     private String response;
     private String responseCode;
     private String responseMessage;
@@ -15,117 +15,127 @@ public class RequestInfo {
     private String contentEncoding;
     private String requestHeaders;
 
-    public Map<String, List<String>> getHeaders() {
+    Map<String, List<String>> getHeaders() {
         return headers;
+    }
+
+
+    String getUrl(){
+        return url;
+    }
+
+    void setUrl(String urlString){
+        url = urlString;
+    }
+
+
+    void setHeaders(Map<String, List<String>> headers) {
+        this.headers = headers;
     }
 
     /**
      * @return Returns the Header.
      */
 
-    public void setHeaders(Map<String, List<String>> headers) {
-        this.headers = headers;
-    }
-
-    public String getHeadersAsString() {
-        String res = "";
+    String getHeadersAsString() {
+        StringBuilder res = new StringBuilder();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            res = res + entry.getKey() + " :";
+            res.append(entry.getKey()).append(" :");
             for (String value : entry.getValue()) {
-                res = res + " " + value;
+                res.append(" ").append(value);
             }
-            res = res + "\n";
+            res.append("\n");
 
         }
-        return res;
+        return res.toString();
 
     }
 
     /**
      * @return Returns the Response.
      */
-    public String getResponse() {
+    String getResponse() {
         return response;
     }
 
-    public void setResponse(String response) {
+    void setResponse(String response) {
         this.response = response;
     }
 
     /**
      * @return Returns the ResponseCode.
      */
-    public String getResponseCode() {
+    String getResponseCode() {
         return responseCode;
     }
 
-    public void setResponseCode(String responseCode) {
+    void setResponseCode(String responseCode) {
         this.responseCode = responseCode;
     }
 
     /**
      * @return Returns the ResponseMessage.
      */
-    public String getResponseMessage() {
+    String getResponseMessage() {
         return responseMessage;
     }
 
-    public void setResponseMessage(String responseMessage) {
+    void setResponseMessage(String responseMessage) {
         this.responseMessage = responseMessage;
     }
 
     /**
      * @return Returns the ContentType.
      */
-    public String getContentType() {
+    String getContentType() {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    void setContentType(String contentType) {
         this.contentType = contentType;
     }
 
     /**
      * @return Returns the Success.
      */
-    public boolean isSuccess() {
+    boolean isSuccess() {
         return success;
     }
 
-    public void setSuccess(boolean success) {
+    void setSuccess(boolean success) {
         this.success = success;
     }
 
     /**
      * @return Returns the Sent Bytes.
      */
-    public long getSentBytes() {
+    long getSentBytes() {
         return sentBytes;
     }
 
-    public void setSentBytes(long sentBytes) {
+    void setSentBytes(long sentBytes) {
         this.sentBytes = sentBytes;
     }
 
     /**
      * @return Returns the Content Encoding.
      */
-    public String getContentEncoding() {
+    String getContentEncoding() {
         return contentEncoding;
     }
 
-    public void setContentEncoding(String contentEncoding) {
+    void setContentEncoding(String contentEncoding) {
         this.contentEncoding = contentEncoding;
     }
 
     /**
      * @return Returns the Request Headers.
      */
-    public String getRequestHeaders() {
+    String getRequestHeaders() {
         return requestHeaders;
     }
 
-    public void setRequestHeaders(String setRequestHeaders) {
+    void setRequestHeaders(String setRequestHeaders) {
         this.requestHeaders = setRequestHeaders;
     }
 

@@ -1,18 +1,9 @@
 package com.ramp.jmeter.hls_player.logic;
 
-import org.apache.jmeter.protocol.http.control.CacheManager;
-import org.apache.jmeter.protocol.http.control.CookieManager;
-import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
-import org.apache.jmeter.protocol.http.util.HTTPConstants;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
-import org.apache.jmeter.samplers.Interruptible;
 import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.testelement.TestElement;
-import org.apache.jmeter.testelement.property.CollectionProperty;
-import org.apache.jmeter.testelement.property.JMeterProperty;
-import org.apache.jmeter.testelement.property.TestElementProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaPlaylistSampler extends AbstractSampler implements Interruptible {
-    public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
-    public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
-    public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
+public class MediaPlaylistSampler extends AbstractSampler {
     private static final Logger log = LoggerFactory.getLogger(MediaPlaylistSampler.class);
 
     public static final String CUSTOM = "CUSTOM";
@@ -52,15 +40,10 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
 
     private Parser parser;
 
-
     private RequestInfo masterResponse = null;
 
     private String playlistUri = null;
 
-    private RequestInfo playlistResponse = null;
-    private SampleResult playlistResult = null;
-
-    private boolean isLive = false; // does not have an end tag
     private boolean isFirstSample = true;
     private int targetDuration = 0; // HLS target duration
 
@@ -68,7 +51,7 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
 
     private long nextCallTime = 0;
 
-    private List<SegmentInfo> segmentsToGet = new ArrayList<>();
+    private final List<SegmentInfo> segmentsToGet = new ArrayList<>();
     private SegmentInfo lastExtracted = null;
 
     public MediaPlaylistSampler() {
@@ -77,27 +60,48 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
         parser = new Parser();
     }
 
-    public HeaderManager getHeaderManager() {
-        return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
+
+    void setResolutionData(String res) {
+        this.setProperty(CUSTOM_RESOLUTION, res);
     }
 
-    void setPlaylistUri(RequestInfo request) {
-        try {
-            playlistUri = getPlaylistUri(request, parser);
-        } catch (MalformedURLException ex) {
-            ex.printStackTrace();
-        }
+    private String getResolutionData() {
+        return this.getPropertyAsString(CUSTOM_RESOLUTION);
+    }
+
+    void setBandwidthData(String net) {
+        this.setProperty(CUSTOM_BANDWIDTH, net);
+    }
+
+    private String getBandwidthProp() {
+        return this.getPropertyAsString(CUSTOM_BANDWIDTH);
+    }
+
+    void setResolutionType(String type) {
+        this.setProperty(RESOLUTION_OPTION, type);
+    }
+
+    private String getResolutionType() {
+        return this.getPropertyAsString(RESOLUTION_OPTION);
+    }
+
+    void setBandwidthType(String type) {
+        this.setProperty(BANDWIDTH_OPTION, type);
+    }
+
+    private String getBandwidthType() {
+        return this.getPropertyAsString(BANDWIDTH_OPTION);
     }
 
     private String getPlaylistUri(RequestInfo respond, Parser parser) throws MalformedURLException {
-        URL masterURL = new URL(respond.url);
+        URL masterURL = new URL(respond.getUrl());
         String basePath = masterURL.getPath().substring(0, masterURL.getPath().lastIndexOf('/') + 1);
-        log.info("extracting " + this.getMediaPlaylistType() + " playlist uri from master playlist(" + respond.url + ") baseurl(" + basePath + ")");
+        log.info("extracting " + this.getMediaPlaylistType() + " playlist uri from master playlist(" + respond.getUrl() + ") basePath(" + basePath + ")");
         String playlistUri = null;
         switch (this.getMediaPlaylistType()) {
             case "Video":
                 playlistUri = parser.selectVideoPlaylist(respond.getResponse(),
-                        this.getRESDATA(), this.getNetwordData(),
+                        this.getResolutionData(), this.getBandwidthProp(),
                         this.getBandwidthType(), this.getResolutionType());
                 break;
             case "Audio":
@@ -117,13 +121,14 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
                 log.error("The playlist is neither master or media");
                 return null;
             }
-            playlistUri = respond.url; // the supplied url is the media playlist possibly
+            playlistUri = respond.getUrl(); // the supplied url is the media playlist possibly
         }
 
+        String portString = masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "";
         if (playlistUri.indexOf('/') == 0) {//relative to host
-            playlistUri = masterURL.getProtocol() + "://" + masterURL.getHost() + (masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "") + playlistUri;
+            playlistUri = masterURL.getProtocol() + "://" + masterURL.getHost() + portString + playlistUri;
         } else if (!playlistUri.startsWith("http")) {//relative to base path
-            playlistUri = masterURL.getProtocol() + "://" + masterURL.getHost() + (masterURL.getPort() > 0 ? ":" + masterURL.getPort() : "") + basePath + playlistUri;
+            playlistUri = masterURL.getProtocol() + "://" + masterURL.getHost() + portString + basePath + playlistUri;
         }
 
         log.info("playlistUri: " + playlistUri);
@@ -149,8 +154,7 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
         RequestInfo response = parser.getBaseUrl(new URL(playlistUri), playListResult, true);
         playListResult.sampleEnd();
 
-        playListResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(playlistUri) + "\n\n"
-                + getRequestHeader(this.getHeaderManager()));
+        playListResult.setRequestHeaders(response.getRequestHeaders());
         playListResult.setSuccessful(response.isSuccess());
         playListResult.setResponseMessage(response.getResponseMessage());
         playListResult.setSampleLabel("playlist");
@@ -168,7 +172,7 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
                 + 1 // Add \r for initial header
                 + 2; // final \r\n before data
 
-        playListResult.setHeadersSize((int) headerBytes);
+        playListResult.setHeadersSize(headerBytes);
         playListResult.setSentBytes(response.getSentBytes());
         playListResult.setDataEncoding(response.getContentEncoding());
 
@@ -201,13 +205,14 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
                     try {
                         Thread.sleep(now - nextPlaylistGetTime); // only get playlist every TD/2 seconds
                     } catch (InterruptedException e1) {
-                        log.warn("sample: Thead.sleep() interrupted");
+                        log.warn("sample: Thread.sleep() interrupted");
                     }
                 }
-                playlistResult = new SampleResult();
-                playlistResponse = getPlaylist(playlistResult, parser);
+                SampleResult playlistResult = new SampleResult();
+                RequestInfo playlistResponse = getPlaylist(playlistResult, parser);
 
-                isLive = parser.isLive(playlistResponse.getResponse());
+                // does not have an end tag
+                boolean isLive = parser.isLive(playlistResponse.getResponse());
                 if (isLive) {
                     log.debug("sample: detected live playlist");
                     if (isFirstSample) {
@@ -258,40 +263,7 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
         return null;
     }
 
-    public String getRESDATA() {
-        return this.getPropertyAsString(CUSTOM_RESOLUTION);
-    }
-
-    public String getNetwordData() {
-        return this.getPropertyAsString(CUSTOM_BANDWIDTH);
-    }
-
-    public String getResolutionType() {
-        return this.getPropertyAsString(RESOLUTION_OPTION);
-    }
-
-    public String getBandwidthType() {
-        return this.getPropertyAsString(BANDWIDTH_OPTION);
-    }
-
-
-    public void setResData(String res) {
-        this.setProperty(CUSTOM_RESOLUTION, res);
-    }
-
-    public void setNetworkData(String net) {
-        this.setProperty(CUSTOM_BANDWIDTH, net);
-    }
-
-    public void setResolutionType(String type) {
-        this.setProperty(RESOLUTION_OPTION, type);
-    }
-
-    public void setBandwidthType(String type) {
-        this.setProperty(BANDWIDTH_OPTION, type);
-    }
-
-    public SampleResult getSegment(Parser parser, SegmentInfo segmentInfo, String url) {
+    private SampleResult getSegment(Parser parser, SegmentInfo segmentInfo, String url) {
         HTTPSampleResult sampleResult = new HTTPSampleResult();
 
         String uriString = segmentInfo.getUri();
@@ -380,122 +352,15 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
         return sampleResult;
     }
 
-    // private method to allow AsyncSample to reset the value without performing
-    // checks
-    private void setCookieManagerProperty(CookieManager value) {
-        setProperty(new TestElementProperty(COOKIE_MANAGER, value));
-    }
-
-    public void setCookieManager(CookieManager value) {
-        CookieManager mgr = getCookieManager();
-        if (mgr != null) {
-            log.warn("Existing CookieManager " + mgr.getName() + " superseded by " + value.getName());
-        }
-        setCookieManagerProperty(value);
-    }
-
-    public CookieManager getCookieManager() {
-        return (CookieManager) getProperty(COOKIE_MANAGER).getObjectValue();
-    }
-
-    public void setCacheManager(CacheManager value) {
-        CacheManager mgr = getCacheManager();
-        if (mgr != null) {
-            log.warn("Existing CacheManager " + mgr.getName() + " superseded by " + value.getName());
-        }
-        setCacheManagerProperty(value);
-    }
-
-    // private method to allow AsyncSample to reset the value without performing
-    // checks
-    private void setCacheManagerProperty(CacheManager value) {
-        setProperty(new TestElementProperty(CACHE_MANAGER, value));
-    }
-
-    public CacheManager getCacheManager() {
-        return (CacheManager) getProperty(CACHE_MANAGER).getObjectValue();
-    }
-
-    public String getRequestHeader(org.apache.jmeter.protocol.http.control.HeaderManager headerManager) {
-        StringBuilder headerStringb = new StringBuilder();
-
-        if (headerManager != null) {
-            CollectionProperty headers = headerManager.getHeaders();
-            if (headers != null) {
-                for (JMeterProperty jMeterProperty : headers) {
-                    org.apache.jmeter.protocol.http.control.Header header = (org.apache.jmeter.protocol.http.control.Header) jMeterProperty
-                            .getObjectValue();
-                    String n = header.getName();
-                    if (!HTTPConstants.HEADER_CONTENT_LENGTH.equalsIgnoreCase(n)) {
-                        String v = header.getValue();
-                        v = v.replaceFirst(":\\d+$", "");
-                        headerStringb.append(n).append(": ").append(v).append("\n");
-                    }
-                }
-            }
-        }
-
-        return headerStringb.toString();
-    }
-
-    public void setHeaderManager(HeaderManager value) {
-        HeaderManager mgr = getHeaderManager();
-        if (mgr != null) {
-            value = mgr.merge(value);
-            if (log.isDebugEnabled()) {
-                log.debug("Existing HeaderManager '" + mgr.getName() + "' merged with '" + value.getName() + "'");
-                for (int i = 0; i < value.getHeaders().size(); i++) {
-                    log.debug("    " + value.getHeader(i).getName() + "=" + value.getHeader(i).getValue());
-                }
-            }
-        }
-        setProperty(new TestElementProperty(HEADER_MANAGER, (TestElement) value));
-    }
-
-    public String getCookieHeader(String urlData) throws MalformedURLException {
-        String headerString = "";
-
-        URL url = new URL(urlData);
-        // Extracts all the required cookies for that particular URL request
-        String cookieHeader = null;
-        if (getCookieManager() != null) {
-            cookieHeader = getCookieManager().getCookieHeaderForURL(url);
-            if (cookieHeader != null) {
-                headerString = headerString + HTTPConstants.HEADER_COOKIE + ": " + cookieHeader + "\n";
-            }
-        }
-
-        return headerString;
-    }
-
-    @Override
-    public void addTestElement(TestElement el) {
-        if (el instanceof HeaderManager) {
-            setHeaderManager((HeaderManager) el);
-        } else if (el instanceof CookieManager) {
-            setCookieManager((CookieManager) el);
-        } else if (el instanceof CacheManager) {
-            setCacheManager((CacheManager) el);
-        } else {
-            super.addTestElement(el);
-        }
-    }
-
-    public void setParser(Parser p) {
+    void setParser(Parser p) {
         parser = p;
     }
 
-    public long getNextCallTimeMillis() {
+    long getNextCallTimeMillis() {
         return nextCallTime;
     }
 
-    public void setMasterPlaylist(RequestInfo masterResponse) {
+    void setMasterPlaylist(RequestInfo masterResponse) {
         this.masterResponse = masterResponse;
-    }
-
-    @Override
-    public boolean interrupt() {
-
-        return false;
     }
 }
