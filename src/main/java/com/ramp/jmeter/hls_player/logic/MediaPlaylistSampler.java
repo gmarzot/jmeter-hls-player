@@ -196,7 +196,7 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
 
             if (segmentsToGet.isEmpty()) {
                 long now = System.currentTimeMillis();
-		long nextPlaylistGetTime = lastTimeMillis + (targetDuration * 500);
+                long nextPlaylistGetTime = lastTimeMillis + (targetDuration * 500);
                 if ((targetDuration > 0) && now < nextPlaylistGetTime) {
                     try {
                         Thread.sleep(now - nextPlaylistGetTime); // only get playlist every TD/2 seconds
@@ -235,7 +235,6 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
                 if (td > 0) {
                     targetDuration = td;
                 }
-
 
                 nextCallTime = System.currentTimeMillis();
                 return playlistResult;
