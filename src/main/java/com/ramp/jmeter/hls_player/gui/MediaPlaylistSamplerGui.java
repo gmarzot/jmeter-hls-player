@@ -10,7 +10,7 @@ public class MediaPlaylistSamplerGui extends AbstractSamplerGui {
 
     private static final String DEFAULT = "DEFAULT";
 
-    private MediaPlaylistSamplerPanel panel;
+    private final MediaPlaylistSamplerPanel panel;
 
     public MediaPlaylistSamplerGui() {
         super();

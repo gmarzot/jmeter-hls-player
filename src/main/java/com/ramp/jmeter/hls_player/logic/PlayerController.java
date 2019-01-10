@@ -3,20 +3,12 @@ package com.ramp.jmeter.hls_player.logic;
 
 import org.apache.jmeter.control.GenericController;
 import org.apache.jmeter.control.NextIsNullException;
-import org.apache.jmeter.protocol.http.control.CacheManager;
-import org.apache.jmeter.protocol.http.control.CookieManager;
-import org.apache.jmeter.protocol.http.control.HeaderManager;
-import org.apache.jmeter.protocol.http.util.HTTPConstants;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.samplers.Sampler;
 import org.apache.jmeter.testelement.TestElement;
-import org.apache.jmeter.testelement.property.CollectionProperty;
-import org.apache.jmeter.testelement.property.JMeterProperty;
-import org.apache.jmeter.testelement.property.TestElementProperty;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -145,17 +137,13 @@ public class PlayerController extends GenericController {
 
     //---------------------------Master Playlist Getting-----------------------------------//
 
-    public static final String HEADER_MANAGER = "HLSRequest.header_manager"; // $NON-NLS-1$
-    public static final String COOKIE_MANAGER = "HLSRequest.cookie_manager"; // $NON-NLS-1$
-    public static final String CACHE_MANAGER = "HLSRequest.cache_manager"; // $NON-NLS-1$
-
     public static final String MASTER_PLAYLIST_URL = "MASTER_PLAYLIST_URL";
     public static final String IS_CUSTOM_DURATION = "IS_CUSTOM_DURATION";
     public static final String CUSTOM_DURATION = "CUSTOM_DURATION";
 
     private Parser parser;
 
-    public RequestInfo tryGetMasterList() {
+    private RequestInfo tryGetMasterList() {
         try {
             SampleResult masterResult = new SampleResult();
             return getMasterList(masterResult, parser);
@@ -171,8 +159,7 @@ public class PlayerController extends GenericController {
         RequestInfo response = parser.getBaseUrl(new URL(getURLData()), masterResult, true);
         masterResult.sampleEnd();
 
-        masterResult.setRequestHeaders(response.getRequestHeaders() + "\n\n" + getCookieHeader(getURLData()) + "\n\n"
-                + getRequestHeader(this.getHeaderManager()));
+        masterResult.setRequestHeaders(response.getRequestHeaders());
         masterResult.setSuccessful(response.isSuccess());
         masterResult.setResponseMessage(response.getResponseMessage());
         masterResult.setSampleLabel("master");
@@ -198,101 +185,16 @@ public class PlayerController extends GenericController {
 
     }
 
-    public void setCacheManager(CacheManager value) {
-        CacheManager mgr = getCacheManager();
-        if (mgr != null) {
-            log.warn("Existing CacheManager " + mgr.getName() + " superseded by " + value.getName());
-        }
-        setCacheManagerProperty(value);
-    }
-
-    // private method to allow AsyncSample to reset the value without performing
-    // checks
-    private void setCacheManagerProperty(CacheManager value) {
-        setProperty(new TestElementProperty(CACHE_MANAGER, value));
-    }
-
-    public CacheManager getCacheManager() {
-        return (CacheManager) getProperty(CACHE_MANAGER).getObjectValue();
-    }
-
-    public String getRequestHeader(org.apache.jmeter.protocol.http.control.HeaderManager headerManager) {
-        StringBuilder headerStringb = new StringBuilder();
-
-        if (headerManager != null) {
-            CollectionProperty headers = headerManager.getHeaders();
-            if (headers != null) {
-                for (JMeterProperty jMeterProperty : headers) {
-                    org.apache.jmeter.protocol.http.control.Header header = (org.apache.jmeter.protocol.http.control.Header) jMeterProperty
-                            .getObjectValue();
-                    String n = header.getName();
-                    if (!HTTPConstants.HEADER_CONTENT_LENGTH.equalsIgnoreCase(n)) {
-                        String v = header.getValue();
-                        v = v.replaceFirst(":\\d+$", "");
-                        headerStringb.append(n).append(": ").append(v).append("\n");
-                    }
-                }
-            }
-        }
-
-        return headerStringb.toString();
-    }
-
-    public void setHeaderManager(HeaderManager value) {
-        HeaderManager mgr = getHeaderManager();
-        if (mgr != null) {
-            value = mgr.merge(value);
-            if (log.isDebugEnabled()) {
-                log.debug("Existing HeaderManager '" + mgr.getName() + "' merged with '" + value.getName() + "'");
-                for (int i = 0; i < value.getHeaders().size(); i++) {
-                    log.debug("    " + value.getHeader(i).getName() + "=" + value.getHeader(i).getValue());
-                }
-            }
-        }
-        setProperty(new TestElementProperty(HEADER_MANAGER, value));
-    }
-
-    public HeaderManager getHeaderManager() {
-        return (HeaderManager) getProperty(MediaPlaylistSampler.HEADER_MANAGER).getObjectValue();
-    }
-
-    public void setCookieManager(CookieManager value) {
-        CookieManager mgr = getCookieManager();
-        if (mgr != null) {
-            log.warn("Existing CookieManager " + mgr.getName() + " superseded by " + value.getName());
-        }
-        setCookieManagerProperty(value);
-    }
-
-    // private method to allow AsyncSample to reset the value without performing
-    // checks
-    private void setCookieManagerProperty(CookieManager value) {
-        setProperty(new TestElementProperty(COOKIE_MANAGER, value));
-    }
-
-    public CookieManager getCookieManager() {
-        return (CookieManager) getProperty(COOKIE_MANAGER).getObjectValue();
-    }
-
-    public String getCookieHeader(String urlData) throws MalformedURLException {
-        String headerString = "";
-
-        URL url = new URL(urlData);
-        // Extracts all the required cookies for that particular URL request
-        if (getCookieManager() != null) {
-            String cookieHeader = getCookieManager().getCookieHeaderForURL(url);
-            if (cookieHeader != null) {
-                headerString = headerString + HTTPConstants.HEADER_COOKIE + ": " + cookieHeader + "\n";
-            }
-        }
-
-        return headerString;
-    }
-
-
-    private String getURLData() {
+    public String getURLData() {
         return this.getPropertyAsString(MASTER_PLAYLIST_URL);
     }
 
 
+    public boolean isCustomDuration() {
+        return this.getPropertyAsBoolean(IS_CUSTOM_DURATION);
+    }
+
+    public String getCustomDuration() {
+        return this.getPropertyAsString(CUSTOM_DURATION);
+    }
 }

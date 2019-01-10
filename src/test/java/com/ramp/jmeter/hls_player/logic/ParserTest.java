@@ -44,10 +44,10 @@ public class ParserTest {
         String payload = "line1\nline2\nline3\nline4\n";
         InputStream stream = new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
 
-        Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        List<String> header1 = new ArrayList<String>();
-        List<String> header2 = new ArrayList<String>();
-        List<String> header3 = new ArrayList<String>();
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> header1 = new ArrayList<>();
+        List<String> header2 = new ArrayList<>();
+        List<String> header3 = new ArrayList<>();
 
         header1.add("header11");
         header1.add("header12");
@@ -89,7 +89,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testExtractUriMaster() throws Exception {
+    public void testExtractUriMaster() {
 
         String res = "#EXTM3U\n#EXT-X-VERSION:4\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=1395723,PROGRAM-ID=1,CODECS=\"avc1.42c01e,mp4a.40.2\",RESOLUTION=640x360,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=1395723,PROGRAM-ID=1,CODECS=\"avc1.42c01e,mp4a.40.2\",RESOLUTION=640x480,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/680k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=170129,PROGRAM-ID=1,CODECS=\"avc1.42c00c,mp4a.40.2\",RESOLUTION=320x180,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/64k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=170129,PROGRAM-ID=1,CODECS=\"avc1.42c00c,mp4a.40.2\",RESOLUTION=280x180,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/56k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=425858,PROGRAM-ID=1,CODECS=\"avc1.42c015,mp4a.40.2\",RESOLUTION=512x288,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/180k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=718158,PROGRAM-ID=1,CODECS=\"avc1.42c015,mp4a.40.2\",RESOLUTION=512x288,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/320k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
 		
@@ -233,7 +233,7 @@ public class ParserTest {
 
     }
 
-    final String sampleMediaPlaylist = "#EXTM3U\n" +
+    private final String sampleMediaPlaylist = "#EXTM3U\n" +
             "#EXT-X-VERSION:3\n" +
             "#EXT-X-TARGETDURATION:2\n" +
             "#EXT-X-MEDIA-SEQUENCE:1896576\n" +

@@ -12,8 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 
 public class MediaPlaylistSamplerTest {
@@ -23,15 +22,14 @@ public class MediaPlaylistSamplerTest {
     private Parser parserMock;
 
     @Before
-    public void setup()
-            throws Exception {
+    public void setup() {
 //        TestJMeterUtils.createJmeterEnv();
 
         parserMock = Mockito.mock(Parser.class);
         sampler = new MediaPlaylistSampler();
 //		sampler.setURLData("http://www.mock.com/path");
-        sampler.setResData("640x360");
-        sampler.setNetworkData("1395723");
+        sampler.setResolutionData("640x360");
+        sampler.setBandwidthData("1395723");
         sampler.setBandwidthType(MediaPlaylistSampler.MAX);
         sampler.setResolutionType(MediaPlaylistSampler.CUSTOM);
 //		sampler.setPlaySecondsData("20");
@@ -51,17 +49,17 @@ public class MediaPlaylistSamplerTest {
         SegmentInfo f1 = new SegmentInfo("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_1.ts");
         SegmentInfo f2 = new SegmentInfo("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_2.ts");
         SegmentInfo f3 = new SegmentInfo("10", "https://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k_3.ts");
-        List<SegmentInfo> fragments = new ArrayList<SegmentInfo>();
+        List<SegmentInfo> fragments = new ArrayList<>();
         fragments.add(f1);
         fragments.add(f2);
         fragments.add(f3);
 
         String payload1 = "#EXTM3U\n#EXT-X-VERSION:4\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=1395723,PROGRAM-ID=1,CODECS=\"avc1.42c01e,mp4a.40.2\",RESOLUTION=640x360,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=170129,PROGRAM-ID=1,CODECS=\"avc1.42c00c,mp4a.40.2\",RESOLUTION=320x180,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/64k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=425858,PROGRAM-ID=1,CODECS=\"avc1.42c015,mp4a.40.2\",RESOLUTION=512x288,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/180k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n#EXT-X-STREAM-INF:AUDIO=\"600k\",BANDWIDTH=718158,PROGRAM-ID=1,CODECS=\"avc1.42c015,mp4a.40.2\",RESOLUTION=512x288,SUBTITLES=\"subs\"\n/videos/DianaLaufenberg_2010X/video/320k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
         String payload2 = "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXT-X-VERSION:4\n#EXT-X-MEDIA-SEQUENCE:0\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:5.0000,\n#EXT-X-BYTERANGE:440672@0\nhttps://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k.ts\n#EXTINF:5.0000,\n#EXT-X-BYTERANGE:94000@440672\nhttps://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k.ts\n#EXTINF:1.9583,\n#EXT-X-BYTERANGE:22748@534672\nhttps://pb.tedcdn.com/bumpers/hls/video/in/Thousands-320k.ts\n#EXT-X-DISCONTINUITY";
-        Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        List<String> header1 = new ArrayList<String>();
-        List<String> header2 = new ArrayList<String>();
-        List<String> header3 = new ArrayList<String>();
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> header1 = new ArrayList<>();
+        List<String> header2 = new ArrayList<>();
+        List<String> header3 = new ArrayList<>();
         header1.add("header11");
         header1.add("header12");
         header1.add("header13");
@@ -74,7 +72,7 @@ public class MediaPlaylistSamplerTest {
         headers.put("headerKey3", header3);
 
         respond1.setRequestHeaders("GET  http://www.mock.com/path\n");
-        respond1.url = "http://www.mock.com/path";
+        respond1.setUrl("http://www.mock.com/path");
         respond1.setHeaders(headers);
         respond1.setResponse(payload1);
         respond1.setResponseCode("200");
@@ -85,7 +83,7 @@ public class MediaPlaylistSamplerTest {
         respond1.setContentEncoding("UTF-8");
 
         respond2.setRequestHeaders("GET  http://www.mock.com/path/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d\n");
-        respond2.url = "http://www.mock.com/path/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d";
+        respond2.setUrl("http://www.mock.com/path/videos/DianaLaufenberg_2010X/video/600k.m3u8?preroll=Thousands&uniqueId=4df94b1d");
         respond2.setHeaders(headers);
         respond2.setResponse(payload2);
         respond2.setResponseCode("200");
@@ -140,15 +138,15 @@ public class MediaPlaylistSamplerTest {
                 .thenReturn(false);
 
 
-        assertFalse(sampler == null);
+        assertNotNull(sampler);
 
         sampler.setProperty("HLS.MEDIA_PLAYLIST_TYPE", "Video");
         sampler.setMasterPlaylist(respond1);
         SampleResult result = sampler.sample(null);
 
-        assertFalse(result == null);
-        assertEquals("GET  http://www.mock.com/path\n\n\n\n\n", result.getRequestHeaders());
-        assertEquals(true, result.isSuccessful());
+        assertNotNull(result);
+        assertEquals("GET  http://www.mock.com/path\n", result.getRequestHeaders());
+        assertTrue(result.isSuccessful());
         assertEquals("OK", result.getResponseMessage());
         assertEquals("playlist", result.getSampleLabel());
         assertEquals("headerKey1 : header11 header12 header13\nheaderKey2 : header21 header22 header23\nheaderKey3 : header31\n", result.getResponseHeaders());

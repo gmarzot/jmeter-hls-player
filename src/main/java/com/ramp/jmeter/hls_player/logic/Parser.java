@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 import static org.apache.http.protocol.HTTP.USER_AGENT;
 
-public class Parser implements Serializable {
+class Parser implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
     public Parser() {
@@ -26,7 +26,7 @@ public class Parser implements Serializable {
 
     // HTTP GET request
     public RequestInfo getBaseUrl(URL url, SampleResult sampleResult, boolean setRequest) throws IOException {
-        HttpURLConnection con = null;
+        HttpURLConnection con;
         RequestInfo result = new RequestInfo();
         boolean first = true;
         long sentBytes = 0;
@@ -35,7 +35,7 @@ public class Parser implements Serializable {
 
         sampleResult.connectEnd();
 
-        result.url = url.toString();
+        result.setUrl(url.toString());
 
         // By default it is GET request
         con.setRequestMethod("GET");
@@ -52,12 +52,12 @@ public class Parser implements Serializable {
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
 
             if (setRequest)
-                response.append(inputLine + "\n");
+                response.append(inputLine).append("\n");
 
             sentBytes += inputLine.getBytes().length + 1;
 
@@ -88,7 +88,7 @@ public class Parser implements Serializable {
 
     }
 
-    public String getEncoding(String content_type) {
+    private String getEncoding(String content_type) {
         String[] values = content_type.split(";"); // values.length should be 2
         String charset = "";
 
@@ -104,11 +104,11 @@ public class Parser implements Serializable {
     }
 
 
-    public List<SegmentInfo> extractSegmentUris(String playlist) {
+    List<SegmentInfo> extractSegmentUris(String playlist) {
         return extractSegmentUris(playlist, -1);
     }
 
-    public List<SegmentInfo> extractSegmentUris(String playlist, int maxToExtract) {
+    List<SegmentInfo> extractSegmentUris(String playlist, int maxToExtract) {
         String pattern = "#EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
         final List<SegmentInfo> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
@@ -125,7 +125,7 @@ public class Parser implements Serializable {
         return mediaList;
     }
 
-    public List<SegmentInfo> extractSegmentUris(String playlist, SegmentInfo lastExtracted) {
+    List<SegmentInfo> extractSegmentUris(String playlist, SegmentInfo lastExtracted) {
         String pattern = "#EXTINF:(\\d+\\.?\\d*).*\\n(#.*:.*\\n)*(.*(\\?.*\\n*)?)";
         List<SegmentInfo> mediaList = new ArrayList<>();
         Pattern r = Pattern.compile(pattern);
@@ -218,8 +218,8 @@ public class Parser implements Serializable {
         return null;
     }
 
-    public String getVideoUri(String streamPattern, String bandwidthPattern, String resolutionPattern, String playlistData,
-                              String customResolution, String customBandwidth, String bwSelected, String resSelected) {
+    private String getVideoUri(String streamPattern, String bandwidthPattern, String resolutionPattern, String playlistData,
+                               String customResolution, String customBandwidth, String bwSelected, String resSelected) {
         String curBandwidth = null;
         String curResolution = null;
         String uri = null;
@@ -298,7 +298,7 @@ public class Parser implements Serializable {
         return -1;
     }
 
-    protected boolean isSuccessCode(int code) {
+    private boolean isSuccessCode(int code) {
         return code >= 200 && code <= 399;
     }
 
