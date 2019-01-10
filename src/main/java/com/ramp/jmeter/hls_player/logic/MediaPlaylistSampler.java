@@ -1,6 +1,9 @@
 package com.ramp.jmeter.hls_player.logic;
 
+import org.apache.commons.io.input.CountingInputStream;
+import org.apache.http.protocol.HTTP;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
+import org.apache.jmeter.protocol.http.util.HTTPConstants;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -259,6 +262,11 @@ public class MediaPlaylistSampler extends AbstractSampler {
         log.warn("Sampler returning null!");
         nextCallTime = System.currentTimeMillis();
         return null;
+    }
+
+    private HTTPSampleResult failSample(HTTPSampleResult sampleResult){
+        sampleResult.setSuccessful(false);
+        return sampleResult;
     }
 
     private SampleResult getSegment(Parser parser, SegmentInfo segmentInfo, String url) {
