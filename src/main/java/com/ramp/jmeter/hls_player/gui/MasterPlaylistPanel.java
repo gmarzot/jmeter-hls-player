@@ -3,20 +3,42 @@ package com.ramp.jmeter.hls_player.gui;
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 
-public class MasterPlaylistPanel extends JPanel {
-    //Master Playlist Panel
-    JLabel urlTextFieldLabel = new JLabel("URL:");
-    JTextField urlTextField = new JTextField();
-    ButtonGroup durationButtons = new ButtonGroup();
-    JRadioButton wholeDurationRButton = new JRadioButton("Whole Duration", true);
-    JRadioButton customDurationRButton = new JRadioButton("Custom Duration", false);
-    JTextField customDurationTextField = new JTextField();
+class MasterPlaylistPanel extends JPanel {
 
+    private final JTextField customDurationTextField;
+    void setCustomDurationTextField(String text){
+        customDurationTextField.setText(text);
+    }
+    String getCustomDurationTextField(){
+        return customDurationTextField.getText();
+    }
 
-    public MasterPlaylistPanel() {
+    private final JTextField urlTextField;
+    void setUrlTextField(String text){
+        urlTextField.setText(text);
+    }
+    String getUrlTextField(){
+        return urlTextField.getText();
+    }
+
+    private final ButtonGroup durationButtons;
+    private final JRadioButton customDurationRButton;
+    private final JRadioButton wholeDurationRButton;
+
+    MasterPlaylistPanel() {
         //Buttons
+        durationButtons = new ButtonGroup();
+        wholeDurationRButton = new JRadioButton("Whole Duration", true);
         durationButtons.add(wholeDurationRButton);
+        customDurationRButton = new JRadioButton("Custom Duration", false);
         durationButtons.add(customDurationRButton);
+
+        // Labels
+        JLabel urlTextFieldLabel = new JLabel("URL:");
+
+        // Text Fields
+        customDurationTextField = new JTextField();
+        urlTextField = new JTextField();
 
         //Actions
         customDurationRButton.addItemListener(e -> {
@@ -33,6 +55,7 @@ public class MasterPlaylistPanel extends JPanel {
         masterPlaylistPanelLayout.setAutoCreateContainerGaps(true);
         this.setBorder(BorderFactory.createTitledBorder("Master Playlist"));
         this.setLayout(masterPlaylistPanelLayout);
+        //Master Playlist Panel
         masterPlaylistPanelLayout.setHorizontalGroup(
                 masterPlaylistPanelLayout.createSequentialGroup()
                         .addComponent(urlTextFieldLabel)
@@ -51,5 +74,13 @@ public class MasterPlaylistPanel extends JPanel {
                         .addComponent(customDurationTextField,
                                 javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
+    }
+
+    void setIsCustomDuration(boolean isCustomDuration) {
+        customDurationRButton.setSelected(isCustomDuration);
+    }
+
+    boolean isCustomDuration() {
+        return customDurationRButton.isSelected();
     }
 }

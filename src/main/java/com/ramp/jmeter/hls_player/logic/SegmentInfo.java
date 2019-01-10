@@ -2,7 +2,7 @@ package com.ramp.jmeter.hls_player.logic;
 
 import java.util.Objects;
 
-public class SegmentInfo {
+class SegmentInfo {
     private String duration;
     private String tsUri;
 

@@ -5,43 +5,43 @@ import com.ramp.jmeter.hls_player.logic.MediaPlaylistSampler;
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 
-public class MediaPlaylistSamplerPanel extends JPanel {
+class MediaPlaylistSamplerPanel extends JPanel {
 
-    private JPanel videoStreamSelectionPanel = new JPanel();
-    private JPanel resolutionOptions = new JPanel();
-    private JPanel bandwidthOptions = new JPanel();
+    private final JPanel videoStreamSelectionPanel = new JPanel();
+    private final JPanel resolutionOptions = new JPanel();
+    private final JPanel bandwidthOptions = new JPanel();
 
     private JPanel mediaPlaylistPanel = videoStreamSelectionPanel;
 
-    private JPanel audioTrackSelectionPanel = new JPanel();
+    private final JPanel audioTrackSelectionPanel = new JPanel();
 
-    private JPanel closedCaptionTrackSelectionPanel = new JPanel();
+    private final JPanel closedCaptionTrackSelectionPanel = new JPanel();
 
-    private JTextField resolutionField = new JTextField();
-    private JTextField bandwidthField = new JTextField();
-    private JTextField audioField = new JTextField();
-    private JTextField CCField = new JTextField();
+    private final JTextField resolutionField = new JTextField();
+    private final JTextField bandwidthField = new JTextField();
+    private final JTextField audioField = new JTextField();
+    private final JTextField CCField = new JTextField();
 
-    private JComboBox mediaPlaylistTypeCBox = new JComboBox<>(new String[]{"Video", "Audio", "Closed Captions"});
+    private final JComboBox mediaPlaylistTypeCBox = new JComboBox<>(new String[]{"Video", "Audio", "Closed Captions"});
 
-    private JRadioButton rMinimumResolution = new JRadioButton("Min");
-    private JRadioButton rMaximumResolution = new JRadioButton("Max");
-    private JRadioButton rCustomResolution = new JRadioButton("Custom (WxH): ");
+    private final JRadioButton rMinimumResolution = new JRadioButton("Min");
+    private final JRadioButton rMaximumResolution = new JRadioButton("Max");
+    private final JRadioButton rCustomResolution = new JRadioButton("Custom (WxH): ");
 
-    private JRadioButton rMinimumBandwidth = new JRadioButton("Min");
-    private JRadioButton rMaximumBandwidth = new JRadioButton("Max");
-    private JRadioButton rCustomBandwidth = new JRadioButton("Custom (bps): ");
+    private final JRadioButton rMinimumBandwidth = new JRadioButton("Min");
+    private final JRadioButton rMaximumBandwidth = new JRadioButton("Max");
+    private final JRadioButton rCustomBandwidth = new JRadioButton("Custom (bps): ");
 
-    private JRadioButton rDefaultAudio = new JRadioButton("Default");
-    private JRadioButton rCustomAudio = new JRadioButton("Custom: ");
+    private final JRadioButton rDefaultAudio = new JRadioButton("Default");
+    private final JRadioButton rCustomAudio = new JRadioButton("Custom: ");
 
-    private JRadioButton rDefaultCC = new JRadioButton("Default");
-    private JRadioButton rCustomCC = new JRadioButton("Custom: ");
+    private final JRadioButton rDefaultCC = new JRadioButton("Default");
+    private final JRadioButton rCustomCC = new JRadioButton("Custom: ");
 
-    private ButtonGroup resolGroup = new ButtonGroup();
-    private ButtonGroup bandGroup = new ButtonGroup();
-    private ButtonGroup audioGroup = new ButtonGroup();
-    private ButtonGroup CCGroup = new ButtonGroup();
+    private final ButtonGroup resolutionButtonGroup = new ButtonGroup();
+    private final ButtonGroup bandGroup = new ButtonGroup();
+    private final ButtonGroup audioGroup = new ButtonGroup();
+    private final ButtonGroup CCGroup = new ButtonGroup();
 
 
     public MediaPlaylistSamplerPanel() {
@@ -51,9 +51,9 @@ public class MediaPlaylistSamplerPanel extends JPanel {
 
     private void initComponents() {
 
-        resolGroup.add(rCustomResolution);
-        resolGroup.add(rMaximumResolution);
-        resolGroup.add(rMinimumResolution);
+        resolutionButtonGroup.add(rCustomResolution);
+        resolutionButtonGroup.add(rMaximumResolution);
+        resolutionButtonGroup.add(rMinimumResolution);
         rMinimumResolution.setSelected(true);
 
         bandGroup.add(rCustomBandwidth);
@@ -105,26 +105,30 @@ public class MediaPlaylistSamplerPanel extends JPanel {
                     }
                 }
         );
-        mediaPlaylistTypeCBox.addItemListener(e -> {
-                    String mediaType = (String) e.getItem();
-                    this.removeAll();
-                    if (mediaType.equals("Video")) {
-                        mediaPlaylistPanel = videoStreamSelectionPanel;
-                    } else if (mediaType.equals("Audio")) {
-                        mediaPlaylistPanel = audioTrackSelectionPanel;
-                    } else if (mediaType.equals("Closed Captions")) {
-                        mediaPlaylistPanel = closedCaptionTrackSelectionPanel;
-                    } else {
-                        //not good
-                    }
-                    setupLayouts();
-                    repaint();
-                    revalidate();
-                }
-        );
+        mediaPlaylistTypeCBox.addItemListener( (e) -> {
+            String mediaType = (String) e.getItem();
+            this.removeAll();
+            switch (mediaType) {
+                case "Video":
+                    mediaPlaylistPanel = videoStreamSelectionPanel;
+                    break;
+                case "Audio":
+                    mediaPlaylistPanel = audioTrackSelectionPanel;
+                    break;
+                case "Closed Captions":
+                    mediaPlaylistPanel = closedCaptionTrackSelectionPanel;
+                    break;
+                default:
+                    //not good
+                    break;
+            }
+            setupLayouts();
+            repaint();
+            revalidate();
+        });
     }
 
-    void setupLayouts() {
+    private void setupLayouts() {
         bandwidthOptions.setBorder(BorderFactory.createTitledBorder("Bandwidth Options"));
         GroupLayout bandwidthOptionsLayout = new javax.swing.GroupLayout(bandwidthOptions);
         bandwidthOptionsLayout.setAutoCreateContainerGaps(true);

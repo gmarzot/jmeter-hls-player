@@ -12,7 +12,7 @@ public class PlayerControllerGui extends AbstractControllerGui {
     private static final Logger log = LoggerFactory.getLogger(PlayerControllerGui.class);
 
 
-    private MasterPlaylistPanel masterPlaylistPanel;
+    private final MasterPlaylistPanel masterPlaylistPanel;
 
     public PlayerControllerGui() {
         super();
@@ -46,9 +46,9 @@ public class PlayerControllerGui extends AbstractControllerGui {
         super.configure(testElement);
         PlayerController playerController = (PlayerController) testElement;
         //Master Playlist Setup
-        masterPlaylistPanel.urlTextField.setText(playerController.getPropertyAsString(PlayerController.MASTER_PLAYLIST_URL));
-        masterPlaylistPanel.customDurationRButton.setSelected(playerController.getPropertyAsBoolean(PlayerController.IS_CUSTOM_DURATION));
-        masterPlaylistPanel.customDurationTextField.setText(playerController.getPropertyAsString(PlayerController.CUSTOM_DURATION));
+        masterPlaylistPanel.setUrlTextField(playerController.getURLData());
+        masterPlaylistPanel.setIsCustomDuration(playerController.isCustomDuration());
+        masterPlaylistPanel.setCustomDurationTextField(playerController.getCustomDuration());
 
         masterPlaylistPanel.repaint();
         masterPlaylistPanel.revalidate();
@@ -59,9 +59,9 @@ public class PlayerControllerGui extends AbstractControllerGui {
         this.configureTestElement(testElement);
         if (testElement instanceof PlayerController) {
             //Master Playlist Saving
-            testElement.setProperty(PlayerController.MASTER_PLAYLIST_URL, masterPlaylistPanel.urlTextField.getText());
-            testElement.setProperty(PlayerController.IS_CUSTOM_DURATION, masterPlaylistPanel.customDurationRButton.isSelected());
-            testElement.setProperty(PlayerController.CUSTOM_DURATION, masterPlaylistPanel.customDurationTextField.getText());
+            testElement.setProperty(PlayerController.MASTER_PLAYLIST_URL, masterPlaylistPanel.getUrlTextField());
+            testElement.setProperty(PlayerController.IS_CUSTOM_DURATION, masterPlaylistPanel.isCustomDuration());
+            testElement.setProperty(PlayerController.CUSTOM_DURATION, masterPlaylistPanel.getCustomDurationTextField());
 
         }
     }
