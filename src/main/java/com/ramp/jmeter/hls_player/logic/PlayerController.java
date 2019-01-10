@@ -121,10 +121,11 @@ public class PlayerController extends GenericController {
             log.debug("adding lastSampler to priorityQueue");
             priorityQueue.add(lastSampler);
         } else {
-            log.debug("ERROR: should not occur");
+            log.debug("lastSampler: %s, nextCallTimeMillis: %s",
+                    lastSampler, lastSampler == null? "-":lastSampler.getNextCallTimeMillis());
         }
         Sampler returnValue = super.next();
-        if (returnValue == null) log.error("sampler was null");
+        if (returnValue == null && !isDone()) log.error("sampler was null");
         return returnValue;
     }
 
