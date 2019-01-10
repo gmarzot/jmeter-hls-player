@@ -1,5 +1,6 @@
 package com.ramp.jmeter.hls_player.logic;
 
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.jmeter.protocol.http.control.CacheManager;
 import org.apache.jmeter.protocol.http.control.CookieManager;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
@@ -18,9 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -291,6 +290,11 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
         this.setProperty(BANDWIDTH_OPTION, type);
     }
 
+    private HTTPSampleResult failSample(HTTPSampleResult sampleResult){
+        sampleResult.setSuccessful(false);
+        return sampleResult;
+    }
+
     public SampleResult getSegment(Parser parser, SegmentInfo segmentInfo, String url) {
         HTTPSampleResult sampleResult = new HTTPSampleResult();
 
@@ -301,38 +305,67 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
         }
         log.debug("Calculated segment URI: %s, thread: %s", uriString, getThreadName());
 
-        try {
-            // Fetch Segment
-            //RequestInfo respond = parser.getBaseUrl(new URL(uriString), result, false);
+        URL segmentURL;
+        HttpURLConnection connection;
 
+        try{
             // Create URL object
-            URL httpURL = new URL(uriString);
+            segmentURL = new URL(uriString);
+        } catch (MalformedURLException e){
+            // uriString is not a valid URL
+            e.printStackTrace();
+            return failSample(sampleResult);
+        }
 
+        try {
             // Create the connection object
-            HttpURLConnection connection = (HttpURLConnection) httpURL.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
+            connection = (HttpURLConnection) segmentURL.openConnection();
+            connection.setRequestMethod(HTTPConstants.GET);
             connection.setInstanceFollowRedirects(true);
+            connection.setConnectTimeout(5000);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return failSample(sampleResult);
+        }
 
-            // Get the request Headers
-            String requestHeaderString = parser.HeadersToString(connection.getRequestProperties());
+        // Get the request Headers (there are no headers)
+        //String requestHeaderString = parser.HeadersToString(connection.getRequestProperties());
 
-            // Start recording sample
-            sampleResult.sampleStart();
+        // Start recording sample
+        sampleResult.sampleStart();
 
+        try{
             // manually open the connection
             connection.connect();
             sampleResult.connectEnd();
-
-            // Read in the segment data
-            InputStream in = connection.getInputStream();
-            sampleResult.latencyEnd();
-            byte[] responseData = in.readAllBytes();
-            in.close();
-
-            // Record the end time of a sample and calculate the elapsed time
+            connection.getContent();
+        } catch (IOException e) {
+            // socket error
+            e.printStackTrace();
             sampleResult.sampleEnd();
+            return failSample(sampleResult);
+        }
 
+        long responseSize = -1;
+
+        try{
+            // Read in the segment data
+            CountingInputStream in = new CountingInputStream(connection.getInputStream());
+            sampleResult.latencyEnd();
+            in.readAllBytes();
+            responseSize = in.getByteCount();
+            in.close();
+        } catch (IOException e) {
+            // Input stream error
+            e.printStackTrace();
+            sampleResult.sampleEnd();
+            return failSample(sampleResult);
+        }
+
+        // Record the end time of a sample and calculate the elapsed time
+        sampleResult.sampleEnd();
+
+        try { // Save data to sample result object
             // Set Sample label
             switch (this.getMediaPlaylistType()) {
                 case TYPE_VIDEO:
@@ -349,32 +382,26 @@ public class MediaPlaylistSampler extends AbstractSampler implements Interruptib
             }
 
             // Set Request Data
-            sampleResult.setURL(httpURL);
+            sampleResult.setURL(segmentURL);
             sampleResult.setHTTPMethod(connection.getRequestMethod());
-            sampleResult.setRequestHeaders(requestHeaderString);
-            sampleResult.setSentBytes(requestHeaderString.getBytes().length);
 
             // Set Response Data
             sampleResult.setResponseCode(Integer.toString(connection.getResponseCode()));
             String responseHeaderString = parser.HeadersToString(connection.getHeaderFields());
             sampleResult.setResponseHeaders(responseHeaderString);
+            sampleResult.setHeadersSize(responseHeaderString.getBytes().length);
             sampleResult.setDataEncoding(connection.getContentEncoding());
-            //sampleResult.setResponseData(responseData);
+            sampleResult.setBodySize(responseSize);
             sampleResult.setResponseMessage(connection.getResponseMessage());
             sampleResult.setContentType(connection.getContentType());
-            sampleResult.setHeadersSize(responseHeaderString.getBytes().length);
-            // TODO: verify this calculation for total bytes received (complete http response including headers)
-            sampleResult.setBytes(connection.getContentLengthLong() + sampleResult.getHeadersSize());
 
             // Set SampleResult Metadata
             sampleResult.setSuccessful(connection.getResponseCode() >= 200
-                    && connection.getResponseCode() < 300);
+                    && connection.getResponseCode() < 400);
 
         } catch (IOException e1) {
             e1.printStackTrace();
-            sampleResult.sampleEnd();
-            sampleResult.setSuccessful(false);
-            sampleResult.setResponseMessage("Exception: " + e1);
+            log.error("unexpected error processing response data");
         }
 
         return sampleResult;
