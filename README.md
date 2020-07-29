@@ -1,3 +1,6 @@
+# Attention
+A more featureful plugin which accomplishes the same task as this plugin can be found [here](https://github.com/Blazemeter/HLSPlugin).
+
 # HLS PLAYER PLUGIN
 The HLS protocol provides an open, reliable, efficient means of delivering continuous video streaming (live or VOD) over the Internet using a standard HTTP transport. It allows a receiver to adapt the bitrate of the media to the current network conditions, in order to maintain uninterrupted playback at the best possible quality. Using HTTP in this way in many cases allows the content to be cached for efficient and scalable delivery to large audiences.
  #### HTTP Live Streaming process:
