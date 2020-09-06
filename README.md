@@ -1,4 +1,6 @@
 # Attention
+NOTE: The new Blazemeter HLS and DASH plugin is working well and preferred: https://github.com/Blazemeter/HLSPlugin
+
 A more featureful plugin which accomplishes the same task as this plugin can be found [here](https://github.com/Blazemeter/HLSPlugin).
 
 # HLS PLAYER PLUGIN
